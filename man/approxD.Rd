@@ -9,9 +9,9 @@ approxD(f, f_params = NULL, x, n = 1, h = sqrt(.Machine$double.eps))
 \arguments{
 \item{f}{The function to evaluate}
 
-\item{f_params}{A \code{list} of any associated parameters of \code{fun}.}
+\item{f_params}{A \code{list} of any associated parameters of \code{f}.}
 
-\item{x}{The value at which to evaluate the derivative of \code{fun}.}
+\item{x}{The value at which to evaluate the derivative of \code{f}.}
 
 \item{n}{The order of derivative to calculate, 1 or 2.  Default is 1.}
 

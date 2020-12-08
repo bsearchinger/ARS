@@ -2,20 +2,23 @@
 % Please edit documentation in R/modular_functions.R
 \name{tanIntersect}
 \alias{tanIntersect}
-\title{Compute Tangent Lines and Intersections}
+\title{Compute x-values of Tangent Intersections}
 \usage{
-tanIntersect(x, f)
+tanIntersect(x, f, f_params = NULL)
 }
 \arguments{
 \item{x}{A \code{numeric} vector of length \code{k} for \code{k > 1}.}
 
 \item{f}{A function representing the target sampling distribution.}
+
+\item{f_params}{A \code{list} of any associated parameters of \code{f}.}
 }
 \value{
-A \code{numeric} vector of \code{k - 1} intersection points.
+A named \code{list} containing the intersection points, the h values
+ of the original x's, and the derivatives to be used in further functions.
 }
 \description{
-\code{tanIntersect} calculates the intersections of subsequent
-tangent lines of a function.
+\code{tanIntersect} calculates the x-values corresponding to the
+intersections of subsequent tangent lines of a function.
 }
 \keyword{internal}

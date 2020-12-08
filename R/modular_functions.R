@@ -10,9 +10,9 @@
 #'
 #' @param f The function to evaluate
 #'
-#' @param f_params A \code{list} of any associated parameters of \code{fun}.
+#' @param f_params A \code{list} of any associated parameters of \code{f}.
 #'
-#' @param x The value at which to evaluate the derivative of \code{fun}.
+#' @param x The value at which to evaluate the derivative of \code{f}.
 #'
 #' @param n The order of derivative to calculate, 1 or 2.  Default is 1.
 #'
@@ -40,11 +40,10 @@ approxD <- function(f,
     msg = "Incorrect arguments supplid to density function."
   )
 
-  if (x == 0){
-    dx <- h
-  }
-  else{
-    dx <- abs(x) * h
+  dx <- abs(x) * h
+
+  if (any(dx == 0)){
+    dx[which(dx == 0)] <- h
   }
   fplus_args <- list(x + dx)
   names(fplus_args) <- arg_names[1]
@@ -89,24 +88,55 @@ approxD <- function(f,
 # Tangent Intersection Function ################################################
 #' @name tanIntersect
 #'
-#' @title Compute Tangent Lines and Intersections
+#' @title Compute x-values of Tangent Intersections
 #'
-#' @description \code{tanIntersect} calculates the intersections of subsequent
-#' tangent lines of a function.
+#' @description \code{tanIntersect} calculates the x-values corresponding to the
+#' intersections of subsequent tangent lines of a function.
 #'
 #' @param x A \code{numeric} vector of length \code{k} for \code{k > 1}.
 #'
 #' @param f A function representing the target sampling distribution.
 #'
-#' @return A \code{numeric} vector of \code{k - 1} intersection points.
+#' @param f_params A \code{list} of any associated parameters of \code{f}.
+#'
+#' @return A named \code{list} containing the intersection points, the h values
+#'  of the original x's, and the derivatives to be used in further functions.
 #'
 #' @import assertthat
+#' @importFrom rlang exec
 #'
 #' @keywords internal
-tanIntersect <- function(x, f) {
+tanIntersect <- function(x, f, f_params = NULL) {
   assertthat::assert_that(
     length(x) > 1,
     msg = 'Must have more than 1 abscissae.'
   )
-  k <- 1:length(x)
+  j_plus_1 <- length(x)
+  j <- j_plus_1 - 1
+
+  xl <- list(x)
+
+  if (!is.null(f_params)){
+    xl <- append(
+      xl,
+      values = f_params)}
+
+  gx <- rlang::exec(
+    f, !!!xl)
+
+  hx <- log(gx)
+
+  dhdx <- (1/gx) * approxD(f = f, x = x)
+
+  z <- (( hx[2:j_plus_1] - hx[1:j] ) - ( x[2:j_plus_1] * dhdx[2:j_plus_1] ) + (
+    x[1:j] * dhdx[1:j] )) / ( dhdx[1:j] - dhdx[2:j_plus_1] )
+
+  out <- list(
+    z = z,
+    hx = hx,
+    dhdx = dhdx
+  )
+
+  return(out)
 }
+
