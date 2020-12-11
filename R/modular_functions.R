@@ -37,7 +37,7 @@ approxD <- function(f,
 
   assertthat::assert_that(
     all(f_names %in% arg_names) == TRUE,
-    msg = "Incorrect arguments supplid to density function."
+    msg = "Incorrect arguments supplied to density function."
   )
 
   dx <- abs(x) * h
@@ -140,3 +140,44 @@ tanIntersect <- function(x, f, f_params = NULL) {
   return(out)
 }
 
+# Upper Hull Function #######################################################
+#' @name upperHull
+#'
+#' @title Compute the Upper Hull 
+#'
+#' @description \code{upperHull} calculates the y-values corresponding to the
+#' upper hull formed from the tangents to a function
+#'
+#' @param x A \code{numeric} vector representing x values
+#'
+#' @param x_abs A \code{numeric} vector of length \code{k} for \code{k > 1},
+#' representing the abscissae.
+#'
+#' @param f A function representing the target sampling distribution.
+#'
+#' @param f_params A \code{list} of any associated parameters of \code{f}.
+#' 
+#' @param supp The support of \code{f}, as a two-membered \code{numeric} vector. 
+#' Default is \code{c(-Inf, Inf)}
+#'
+#' @return A \code{numeric} vector containing the y-values of the upper hull.
+#'
+#' @import assertthat
+#' @importFrom rlang exec
+#'
+#' @keywords internal
+upperHull <- function(x, 
+                      x_abs, 
+                      f, 
+                      f_params = NULL, 
+                      supp = c(-Inf,Inf)
+                      ) {
+  # Find tangent intersections
+	tans <- tanIntersect(x_abs, f, f_params)
+	
+	# Compute the upper hull
+	idx <- findInterval(x, c(supp[1],tans$z,supp[2])) # indices for each piece
+	u_out <- tans$hx[idx] + (x - x_abs[idx])*tans$dhdx[idx]
+	
+	return(u_out)
+}
