@@ -70,3 +70,35 @@ test_that(
         n = 1))
   }
 )
+
+################################################################################
+# Tests for tanIntersect: Computing intersections of tangent lines
+ztest <- c(-0.5, -0.1, 0, 0.1, 0.5)
+xtest <- seq(0, 1, length.out = 20)
+test_that("output of tanIntersect is symmetric for symmetric distribution",{
+  expect_true(
+    all(
+      tanIntersect(ztest, dnorm)$z[1:2] == -1*rev(tanIntersect(ztest, dnorm)$z[3:4])
+      ) == TRUE
+    )
+})
+
+test_that("output of tanIntersect is corrent dimensions", {
+  expect_true(
+    length(
+      tanIntersect(
+        x = xtest,
+        f = dexp,
+        f_params = list(rate = 2))$z
+      ) == 19
+  )
+  expect_true(
+    length(
+      tanIntersect(
+        x = xtest,
+        f = dexp,
+        f_params = list(rate = 2)
+        )) == 3
+  )
+})
+
