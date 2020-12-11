@@ -160,7 +160,7 @@ tanIntersect <- function(x, f, f_params = NULL) {
 #' @param supp The support of \code{f}, as a two-membered \code{numeric} vector. 
 #' Default is \code{c(-Inf, Inf)}
 #'
-#' @return A \code{numeric} vector containing the y-values of the upper hull.
+#' @return A named \code{list} containing the y-values of the upper hull.
 #'
 #' @import assertthat
 #' @importFrom rlang exec
@@ -178,21 +178,21 @@ upperHull <- function(x,
 	# Compute the upper hull
 	z <- tans$z
 	z <- z[z >= supp[1] & z <= supp[2]]
-	idx <- findInterval(x, c(supp[1],tans$z,supp[2])) # indices for each piece
+	idx <- findInterval(x, c(supp[1], z, supp[2])) # indices for each piece
 	u_out <- tans$hx[idx] + (x - x_abs[idx])*tans$dhdx[idx]
 	
 	return(u_out)
 }
 
-# Upper Hull Function #######################################################
-#' @name upperHull
+# Sample From Rejection Envelope ############################################
+#' @name sampleEnv
 #'
-#' @title Compute the Upper Hull 
+#' @title Sample from the Rejection Envelope
 #'
-#' @description \code{upperHull} calculates the y-values corresponding to the
-#' upper hull formed from the tangents to a function
+#' @description \code{sampleEnv} samples from the rejection envelope formed 
+#' by the piecewise upper hull for the given function
 #'
-#' @param x A \code{numeric} vector representing x values
+#' @param n The number of samples
 #'
 #' @param x_abs A \code{numeric} vector of length \code{k} for \code{k > 1},
 #' representing the abscissae.
@@ -204,9 +204,40 @@ upperHull <- function(x,
 #' @param supp The support of \code{f}, as a two-membered \code{numeric} vector. 
 #' Default is \code{c(-Inf, Inf)}
 #'
-#' @return A \code{numeric} vector containing the y-values of the upper hull.
+#' @return A \code{numeric} vector containing the sampled values.
 #'
 #' @import assertthat
 #' @importFrom rlang exec
 #'
 #' @keywords internal
+sampleEnv <- function(n,
+                      x_abs, 
+                      f, 
+                      f_params = NULL,
+                      supp = c(-Inf, Inf)) {
+  # Store the values for the tangent intersections
+  tans <- tanIntersect(x_abs, f, f_params)
+  z <- tans$z
+  z <- z[z >= supp[1] & z <= supp[2]]
+  
+  # Find the normalization constant
+  norm <- integrate(function(a) exp(upperHull(a, x_abs, f, f_params, supp)), 
+                    lower = supp[1], 
+                    upper = supp[2])$value
+  
+  # Sample from this CDF using the inverse-CDF method
+  # Done by taking CDF at each intersection and then splitting into pieces
+  cdf <- function(x) integrate(function(a) 1/norm * exp(upperHull(a,x_abs,f,f_params, supp)),
+                               lower = supp[1],
+                               upper = x)$value
+  z_cdf <- sapply(z, cdf)
+  zb <- c(0,z_cdf,1)
+  lb <- c(supp[1], z)
+  unif_samp <- runif(n)
+  idx <- findInterval(unif_samp, zb)
+  
+  samp <- (unif_samp - zb[idx]) * tans$dhdx[idx] * norm/exp(tans$hx[idx]) + exp((lb[idx] - x_abs[idx])*tans$dhdx[idx])
+  samp <- x_abs[idx] + log(samp)/tans$dhdx[idx]
+  
+  return(samp[!is.na(samp)])
+}
