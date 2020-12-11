@@ -42,9 +42,12 @@ approxD <- function(f,
 
   dx <- abs(x) * h
 
+  # Replace any 0 values with h
   if (any(dx == 0)){
     dx[which(dx == 0)] <- h
   }
+
+  # create argument list and evaluate function
   fplus_args <- list(x + dx)
   names(fplus_args) <- arg_names[1]
   fplus_args <- append(
@@ -138,6 +141,57 @@ tanIntersect <- function(x, f, f_params = NULL) {
   )
 
   return(out)
+}
+
+# Check Conditions Function ####################################################
+#' @name checkThat
+#'
+#' @title Check arguments of the call to ars.
+#'
+#' @description \code{checkThat} performs tests and checks to ensure
+#'  functionality of the adaptive rejection sampling algorithm.  For example, if
+#'  no starting values are supplied, \code{checkThat} will determine viable
+#'  starting values for the initialization step.
+#'
+#' @param f A function representing the target sampling distribution.
+#'
+#' @param f_params A \code{list} of any associated parameters of \code{f}.
+#'
+#' @param starting_values The initial values for the k abscissae.  If NULL,
+#'  values will be determined using the bounds of the log-distribution where the
+#'  first derivative is positive.
+#'
+#' @param sample_size The desired number of samples in the final output.
+#'
+#' @return A warning or error if certain conditions are detected
+#'
+#' @import assertthat
+#' @importFrom rlang exec
+#'
+#' @keywords internal
+checkThat <- function(f, f_params, starting_values, sample_size){
+
+  # Check function call and function parameters
+  assert_that(
+    is.function(f),
+    msg = "f must be a density function."
+    )
+  if (!is.null(f_params)){
+    assert_that(
+      names(f_params) == names(formals(f)),
+      msg = "Names in f_params do not match arguments for f."
+    )
+  }
+
+  # Generate starting values if necessary
+  if (!is.null(starting_values)){
+  }
+
+
+
+
+
+
 }
 
 
