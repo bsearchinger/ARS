@@ -93,28 +93,29 @@ approxD <- function(f,
 #' @description \code{tanIntersect} calculates the x-values corresponding to the
 #' intersections of subsequent tangent lines of a function.
 #'
-#' @param x A \code{numeric} vector of length \code{k} for \code{k > 1}.
+#' @param x_abs A \code{numeric} vector of length \code{k} for \code{k > 1}.
 #'
 #' @param f A function representing the target sampling distribution.
 #'
 #' @param f_params A \code{list} of any associated parameters of \code{f}.
 #'
-#' @return A named \code{list} containing the intersection points, the h values
-#'  of the original x's, and the derivatives to be used in further functions.
+#' @return A named \code{list} containing the original abscissae values,
+#'  the intersection points of the tangent lines, the h values
+#'  of the original abscissae, and the derivatives to be used in further functions.
 #'
 #' @import assertthat
 #' @importFrom rlang exec
 #'
 #' @keywords internal
-tanIntersect <- function(x, f, f_params = NULL) {
+tanIntersect <- function(x_abs, f, f_params = NULL) {
   assertthat::assert_that(
-    length(x) > 1,
+    length(x_abs) > 1,
     msg = 'Must have more than 1 abscissae.'
   )
-  j_plus_1 <- length(x)
+  j_plus_1 <- length(x_abs)
   j <- j_plus_1 - 1
 
-  xl <- list(x)
+  xl <- list(x_abs)
 
   if (!is.null(f_params)){
     xl <- append(
@@ -126,12 +127,14 @@ tanIntersect <- function(x, f, f_params = NULL) {
 
   hx <- log(gx)
 
-  dhdx <- (1/gx) * approxD(f = f, x = x)
+  dhdx <- (1/gx) * approxD(f = f, x = x_abs)
 
-  z <- (( hx[2:j_plus_1] - hx[1:j] ) - ( x[2:j_plus_1] * dhdx[2:j_plus_1] ) + (
-    x[1:j] * dhdx[1:j] )) / ( dhdx[1:j] - dhdx[2:j_plus_1] )
+  # Gilks Equation (1)
+  z <- (( hx[2:j_plus_1] - hx[1:j] ) - ( x_abs[2:j_plus_1] * dhdx[2:j_plus_1] ) + (
+    x_abs[1:j] * dhdx[1:j] )) / ( dhdx[1:j] - dhdx[2:j_plus_1] )
 
   out <- list(
+    x_abs = x_abs,
     z = z,
     hx = hx,
     dhdx = dhdx
@@ -143,7 +146,7 @@ tanIntersect <- function(x, f, f_params = NULL) {
 # Upper Hull Function #######################################################
 #' @name upperHull
 #'
-#' @title Compute the Upper Hull 
+#' @title Compute the Upper Hull
 #'
 #' @description \code{upperHull} calculates the y-values corresponding to the
 #' upper hull formed from the tangents to a function
@@ -156,8 +159,8 @@ tanIntersect <- function(x, f, f_params = NULL) {
 #' @param f A function representing the target sampling distribution.
 #'
 #' @param f_params A \code{list} of any associated parameters of \code{f}.
-#' 
-#' @param supp The support of \code{f}, as a two-membered \code{numeric} vector. 
+#'
+#' @param supp The support of \code{f}, as a two-membered \code{numeric} vector.
 #' Default is \code{c(-Inf, Inf)}
 #'
 #' @return A named \code{list} containing the y-values of the upper hull.
@@ -166,30 +169,31 @@ tanIntersect <- function(x, f, f_params = NULL) {
 #' @importFrom rlang exec
 #'
 #' @keywords internal
-upperHull <- function(x, 
-                      x_abs, 
-                      f, 
-                      f_params = NULL, 
+upperHull <- function(x,
+                      x_abs,
+                      f,
+                      f_params = NULL,
                       supp = c(-Inf,Inf)
                       ) {
   # Find tangent intersections
 	tans <- tanIntersect(x_abs, f, f_params)
-	
+
 	# Compute the upper hull
 	z <- tans$z
 	z <- z[z >= supp[1] & z <= supp[2]]
 	idx <- findInterval(x, c(supp[1], z, supp[2])) # indices for each piece
 	u_out <- tans$hx[idx] + (x - x_abs[idx])*tans$dhdx[idx]
-	
+
 	return(u_out)
 }
+
 
 # Sample From Rejection Envelope ############################################
 #' @name sampleEnv
 #'
 #' @title Sample from the Rejection Envelope
 #'
-#' @description \code{sampleEnv} samples from the rejection envelope formed 
+#' @description \code{sampleEnv} samples from the rejection envelope formed
 #' by the piecewise upper hull for the given function
 #'
 #' @param n The number of samples
@@ -200,31 +204,32 @@ upperHull <- function(x,
 #' @param f A function representing the target sampling distribution.
 #'
 #' @param f_params A \code{list} of any associated parameters of \code{f}.
-#' 
-#' @param supp The support of \code{f}, as a two-membered \code{numeric} vector. 
+#'
+#' @param supp The support of \code{f}, as a two-membered \code{numeric} vector.
 #' Default is \code{c(-Inf, Inf)}
 #'
 #' @return A \code{numeric} vector containing the sampled values.
 #'
 #' @import assertthat
 #' @importFrom rlang exec
+#' @importFrom stats integrate runif
 #'
 #' @keywords internal
 sampleEnv <- function(n,
-                      x_abs, 
-                      f, 
+                      x_abs,
+                      f,
                       f_params = NULL,
                       supp = c(-Inf, Inf)) {
   # Store the values for the tangent intersections
   tans <- tanIntersect(x_abs, f, f_params)
   z <- tans$z
   z <- z[z >= supp[1] & z <= supp[2]]
-  
+
   # Find the normalization constant
-  norm <- integrate(function(a) exp(upperHull(a, x_abs, f, f_params, supp)), 
-                    lower = supp[1], 
+  norm <- integrate(function(a) exp(upperHull(a, x_abs, f, f_params, supp)),
+                    lower = supp[1],
                     upper = supp[2])$value
-  
+
   # Sample from this CDF using the inverse-CDF method
   # Done by taking CDF at each intersection and then splitting into pieces
   cdf <- function(x) integrate(function(a) 1/norm * exp(upperHull(a,x_abs,f,f_params, supp)),
@@ -235,11 +240,11 @@ sampleEnv <- function(n,
   lb <- c(supp[1], z)
   unif_samp <- runif(n)
   idx <- findInterval(unif_samp, zb)
-  
+
   samp <- (unif_samp - zb[idx]) * tans$dhdx[idx] * norm/exp(tans$hx[idx]) + exp((lb[idx] - x_abs[idx])*tans$dhdx[idx])
   samp <- x_abs[idx] + log(samp)/tans$dhdx[idx]
   samp <- samp[!is.na(samp)]
-  
+
   while (length(samp)<n) {
     unif_samp <- runif(n)
     samp_1 <- (unif_samp - zb[idx]) * tans$dhdx[idx] * norm/exp(tans$hx[idx]) + exp((lb[idx] - x_abs[idx])*tans$dhdx[idx])
@@ -247,8 +252,8 @@ sampleEnv <- function(n,
     samp_1 <- samp_1[!is.na(samp_1)]
     samp <- c(samp, samp_1)
   }
-  
+
   samp <- samp[1:n]
-  
+
   return(samp)
 }

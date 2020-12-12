@@ -87,7 +87,7 @@ test_that("output of tanIntersect is corrent dimensions", {
   expect_true(
     length(
       tanIntersect(
-        x = xtest,
+        x_abs = xtest,
         f = dexp,
         f_params = list(rate = 2))$z
       ) == 19
@@ -95,10 +95,10 @@ test_that("output of tanIntersect is corrent dimensions", {
   expect_true(
     length(
       tanIntersect(
-        x = xtest,
+        x_abs = xtest,
         f = dexp,
         f_params = list(rate = 2)
-        )) == 3
+        )) == 4
   )
 })
 

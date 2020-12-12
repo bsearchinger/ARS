@@ -15,4 +15,5 @@ Imports:
     assertthat,
     rlang,
     testthat,
-    Deriv
+    Deriv,
+    stats
