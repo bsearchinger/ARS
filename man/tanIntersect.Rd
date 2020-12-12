@@ -9,7 +9,7 @@ tanIntersect(x_abs, f, f_params = NULL)
 \arguments{
 \item{x_abs}{A \code{numeric} vector of length \code{k} for \code{k > 1}.}
 
-\item{f}{A function representing the target sampling distribution.}
+\item{f}{A function representing the sampling distribution, as a quosure.}
 
 \item{f_params}{A \code{list} of any associated parameters of \code{f}.}
 }

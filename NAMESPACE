@@ -2,5 +2,7 @@
 
 import(assertthat)
 importFrom(rlang,exec)
+importFrom(rlang,quo_get_expr)
 importFrom(stats,integrate)
 importFrom(stats,runif)
+importFrom(stringr,str_replace)

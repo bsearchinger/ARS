@@ -16,4 +16,5 @@ Imports:
     rlang,
     testthat,
     Deriv,
-    stats
+    stats,
+    stringr
