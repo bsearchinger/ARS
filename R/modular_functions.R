@@ -257,3 +257,30 @@ sampleEnv <- function(n,
 
   return(samp)
 }
+
+
+lowerHull <- function(x, x_abs, hx){
+
+  j_plus_1 <- length(x_abs)
+  j <- j_plus_1 - 1
+
+  xl <- list(x_abs)
+
+  lk <- ((x_abs[2:j_plus_1] - x) * hx[1:j] + (x - x_abs[1:j]) * hx[2:j_plus_1])/
+    (x_abs[2:j_plus_1] - x_abs[1:j])
+
+  return(lk)
+}
+
+ars <- function(f, f_params = NULL, supp = c(-Inf, Inf), x_abs, n){
+  tans <- tanIntersect(x_abs, f, f_params)
+  hx <- tans$hx
+  x_star <- sampleEnv(1, x_abs, f, f_params, supp)
+  w <- runif(1)
+  if(w <= exp(lowerHull(x_star, x_abs, hx) - upperHull(x_star, x_abs, f, f_params, supp))){
+    print("accepted")}
+  else{
+    print("rejected")
+  }
+
+  }
