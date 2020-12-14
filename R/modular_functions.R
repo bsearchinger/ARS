@@ -259,28 +259,80 @@ sampleEnv <- function(n,
 }
 
 
-lowerHull <- function(x, x_abs, hx){
+lowerHull <- function(x, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
+  # need to sort x_abs to find the correct x[j] and x[j+1]
+  x_abs <- sort(x_abs)
 
-  j_plus_1 <- length(x_abs)
-  j <- j_plus_1 - 1
+  # find hx for sorted x_abs
+  tans <- tanIntersect(x_abs, f, f_params)
 
-  xl <- list(x_abs)
+  hx <- tans$hx
 
-  lk <- ((x_abs[2:j_plus_1] - x) * hx[1:j] + (x - x_abs[1:j]) * hx[2:j_plus_1])/
-    (x_abs[2:j_plus_1] - x_abs[1:j])
+  # return -Inf if x is outside of the range of x_abs
+  if(x < min(x_abs) || x > max(x_abs)){
+    lk <- -Inf
+  }
+  # find lk for x in the interval [x[j], x[j+1]]
+  else{
+    j <- which(x == sort(append(x_abs, x))) - 1
 
+    lk <- ((x_abs[j+1] - x) * hx[j] + (x - x_abs[j]) * hx[j+1]) /
+      (x_abs[j+1] - x_abs[j])
+  }
   return(lk)
 }
 
 ars <- function(f, f_params = NULL, supp = c(-Inf, Inf), x_abs, n){
-  tans <- tanIntersect(x_abs, f, f_params)
-  hx <- tans$hx
-  x_star <- sampleEnv(1, x_abs, f, f_params, supp)
-  w <- runif(1)
-  if(w <= exp(lowerHull(x_star, x_abs, hx) - upperHull(x_star, x_abs, f, f_params, supp))){
-    print("accepted")}
-  else{
-    print("rejected")
-  }
+  # initialize values
+  vals <- list()
 
+  k <- 1
+
+  while(length(vals) < n){
+    # find hx for each iteration. Only needs to recalculate if x_abs changes
+    x_abs <- sort(x_abs)
+
+    tans <- tanIntersect(x_abs, f, f_params)
+
+    hx <- tans$hx
+
+    # sample x* from s(x)
+    x_star <- sampleEnv(1, x_abs, f, f_params, supp)
+
+    # sample w from unif(0,1)
+    w <- runif(1)
+
+    # find lower and upper hull values for x*
+    lx_star <- lowerHull(x_star, x_abs, f, f_params, supp)
+
+    ux_star <- upperHull(x_star, x_abs, f, f_params, supp)
+
+    # initial test for acceptance
+    if(w <= exp(lx_star - ux_star)){
+      vals <- append(vals, x_star)
+    }
+    # calculate h(x*) and h'(x*) if x* isn't at first accepted
+    ## we're currently not using the updated h'(x*)
+    else{
+      xl_star <- append(x_star, f_params)
+
+      gx <- rlang::exec(f, !!!xl_star)
+
+      hx_star <- log(gx)
+
+      dhdx_star <- (1/gx) * approxD(f = f, x = x_abs)
+
+      # update x_abs
+      x_abs <- sort(append(x_abs, x_star))
+
+      # iterate k
+      k <- k + 1
+
+      # perform second rejection test
+      if(w <= exp(hx_star - ux_star)){
+        vals <- append(vals, x_star)
+      }
+    }
   }
+  return(vals)
+}
