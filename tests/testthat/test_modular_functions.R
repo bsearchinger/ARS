@@ -102,3 +102,145 @@ test_that("output of tanIntersect is corrent dimensions", {
   )
 })
 
+################################################################################
+# Tests for checkThat: argument checking function
+
+# check that takes a quosure
+dexp_quo <- rlang::quo(dexp)
+dnorm_quo <- rlang::quo(dnorm)
+dgamma_quo <- rlang::quo(dgamma)
+
+test_that("checkThat runs silently for correct imputs", {
+  expect_silent(
+    checkThat(
+      f = dnorm_quo,
+      f_params = list(mean = 0, sd = 1),
+      starting_values = c(-0.5, -0.1, 0, 0.1, 0.5),
+      sample_size = 30
+    )
+  )
+  expect_silent(
+    checkThat(
+      f = dnorm_quo,
+      f_params = NULL,
+      starting_values = c(-0.5, -0.1, 0, 0.1, 0.5),
+      sample_size = 30
+    )
+  )
+  expect_silent(
+    checkThat(
+      f = dnorm_quo,
+      f_params =  list(mean = 0, sd = 1),
+      starting_values = NULL,
+      sample_size = 30
+    )
+  )
+  expect_silent(
+    checkThat(
+      f = dnorm_quo,
+      f_params =  NULL,
+      starting_values = NULL,
+      sample_size = 30
+    )
+  )
+})
+
+test_that("checkThat catches missing/incorrect density arguments", {
+  expect_error(
+    checkThat(
+      f = dnorm_quo,
+      f_params = list(mean = 0, df = 1),
+      starting_values = NULL,
+      sample_size = 30
+    )
+  )
+  expect_error(
+    checkThat(
+      f = dgamma_quo,
+      f_params = list(rate = 1),
+      starting_values = NULL,
+      sample_size = 30
+    )
+  )
+  expect_error(
+    checkThat(
+      f = dgamma_quo,
+      f_params = list(scale = 1, lambda = 1),
+      starting_values = NULL,
+      sample_size = 30
+    )
+  )
+  expect_error(
+    checkThat(
+      f = dgamma_quo,
+      f_params = NULL,
+      starting_values = NULL,
+      sample_size = 30
+    )
+  )
+})
+
+test_that("checkThat catches invalid starting values", {
+  expect_error(
+    checkThat(
+      f = dexp_quo,
+      f_params = NULL,
+      starting_values = c(-5, -1, 0, 1, 5),
+      sample_size = 30
+    )
+  )
+  expect_error(
+    checkThat(
+      f = dexp_quo,
+      f_params = list(rate = 1),
+      starting_values = c(5:10),
+      sample_size = 30
+    )
+  )
+  expect_error(
+    checkThat(
+      f = dnorm_quo,
+      f_params = list(mean = 5),
+      starting_values = c(0:4),
+      sample_size = 30
+    )
+  )
+  expect_error(
+    checkThat(
+      f = dnorm_quo,
+      f_params = list(mean = 5),
+      starting_values = c(1),
+      sample_size = 30
+    )
+  )
+})
+
+test_that("checkThat catches invalid sample_size", {
+  expect_error(
+    checkThat(
+      f = dnorm_quo,
+      f_params = list(mean = 0, sd = 1),
+      starting_values = c(-3:3),
+      sample_size = 10.5
+    )
+  )
+  expect_error(
+    checkThat(
+      f = dnorm_quo,
+      f_params = list(mean = 0, sd = 1),
+      starting_values = c(-3:3),
+      sample_size = "1"
+    )
+  )
+  expect_error(
+    checkThat(
+      f = dnorm_quo,
+      f_params = list(mean = 0, sd = 1),
+      starting_values = c(-3:3),
+      sample_size = c(10, 20)
+    )
+  )
+})
+
+
+
