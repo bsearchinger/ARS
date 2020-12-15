@@ -7,7 +7,7 @@
 approxD(f, f_params = NULL, x, n = 1, h = sqrt(.Machine$double.eps))
 }
 \arguments{
-\item{f}{The function to evaluate}
+\item{f}{The function to evaluate, as an expression.}
 
 \item{f_params}{A \code{list} of any associated parameters of \code{f}.}
 
