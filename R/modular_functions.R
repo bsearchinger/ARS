@@ -443,6 +443,31 @@ sampleEnv <- function(n,
   return(samp)
 }
 
+# Lower Hull Function ##########################################################
+#' @name lowerHull
+#'
+#' @title Compute the Lower Hull
+#'
+#' @description \code{lowerHull} calculates the y-values corresponding to the
+#' lower hull formed from the tangents to a function.
+#'
+#' @param x A \code{numeric} vector representing x values.
+#'
+#' @param x_abs A \code{numeric} vector of length \code{k} for \code{k > 1},
+#' representing the abscissae.
+#'
+#' @param f A function representing the target sampling distribution.
+#'
+#' @param f_params A \code{list} of any associated parameters of \code{f}.
+#'
+#' @param supp The support of \code{f}, as a two-membered \code{numeric} vector.
+#' Default is \code{c(-Inf, Inf)}
+#'
+#' @return A named \code{list} containing the y-values of the lower hull.
+#'
+#' @importFrom rlang exec
+#'
+#' @keywords internal
 
 lowerHull <- function(x, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
   # need to sort x_abs to find the correct x[j] and x[j+1]
@@ -467,9 +492,37 @@ lowerHull <- function(x, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
   return(lk)
 }
 
-ars <- function(f, f_params = NULL, supp = c(-Inf, Inf), x_abs, n){
+# Adaptive Rejection Sampling Function #########################################
+#' @name ars
+#'
+#' @title Perform Adaptive Rejection Sampling
+#'
+#' @description \code{ars} calculates a given number of \code{n} random samples
+#' from a given density \code{f}, initialized at the given abscissae
+#' \code{x_abs}.
+#'
+#' @param n The number of samples to return
+#'
+#' @param x_abs A \code{numeric} vector of length \code{k} for \code{k > 1},
+#' representing the abscissae.
+#'
+#' @param f A function representing the target sampling distribution.
+#'
+#' @param f_params A \code{list} of any associated parameters of \code{f}.
+#'
+#' @param supp The support of \code{f}, as a two-membered \code{numeric} vector.
+#' Default is \code{c(-Inf, Inf)}
+#'
+#' @return A named \code{list} containing the y-values of the upper hull.
+#'
+#' @import assertthat
+#' @importFrom rlang exec
+#'
+#' @keywords internal
+
+ars <- function(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
   # initialize values
-  vals <- list()
+  vals <- c()
 
   k <- 1
 
