@@ -20,16 +20,18 @@
 #'
 #' @param sample_size The desired number of samples in the final output.
 #'
-#' @return A warning or error if certain conditions are detected
+#' @return if all checks pass, a named \code{list} is returned containing an
+#'  expression for the density function, and the initial abscissae values.
 #'
 #' @import assertthat
-#' @importFrom rlang exec quo_get_expr
+#' @importFrom rlang exec quo_get_expr as_label
 #' @importFrom stringr str_replace
 #' @importFrom stats runif
 #'
 #' @keywords internal
 checkThat <- function(f, f_params, starting_values, sample_size){
 
+  # Check Sample Size Argument
   assert_that(
     all(is.numeric(sample_size),
         length(sample_size) == 1,
@@ -38,20 +40,38 @@ checkThat <- function(f, f_params, starting_values, sample_size){
     msg = 'Sample size must be a single positive integer value.'
   )
 
+  # Check for necessary default arguments to sampling density
+  d <- rlang::as_label(f)
+  d_args <- formals(d)
+  defaults <- sapply(d_args, is.symbol)
+  default_names <- names(defaults[defaults == TRUE])
+  if (sum(defaults) > 1){
+    default_names <- default_names[-1]
+    if (!is.null(f_params)){
+      assert_that(
+        all(default_names %in% names(f_params)),
+        msg = 'Some required arguments of denisty function are missing'
+      )
+    }
+    else{
+      stop(
+        paste0(
+          "Must provide non-default density arguments: ",
+          paste(default_names, collapse = " ")
+          )
+      )
+    }
+  }
+  else{
+    assert_that(
+      default_names[1] == 'x',
+      msg = "Some required arguments of denisty function are missing"
+    )
+  }
+
+
   # Check function call and function parameters
   fxp <- rlang::quo_get_expr(f)
-
-  # TODO: put this at beginning of final wrapper function
-  #assert_that(
-  #  is.function(f),
-  #  msg = "f must be a density function."
-  #)
-  #if (!is.null(f_params)){
-  #  assert_that(
-  #    names(f_params) == names(formals(f)),
-  #    msg = "Names in f_params do not match arguments for f."
-  #  )
-  #}
 
   # Check that starting values are valid
   if (!is.null(starting_values)){
@@ -74,13 +94,17 @@ checkThat <- function(f, f_params, starting_values, sample_size){
     )
     # Calculate derivatives of the density
     dgdx <- approxD(
-      f = f,
+      f = fxp,
       f_params = f_params,
       x = starting_values
     )
 
     # Deriv of log
     dhdx <- dgdx/gx
+    assert_that(
+      any(is.nan(dhdx)) == FALSE,
+      msg = "Some starting values are not in the range of the density."
+    )
 
     positive_vals <- starting_values[dhdx > 0]
     negative_vals <- starting_values[dhdx < 0]
@@ -127,7 +151,7 @@ checkThat <- function(f, f_params, starting_values, sample_size){
 
     # Calculate derivatives from the sample
     dgdx <- approxD(
-      f = f,
+      f = fxp,
       f_params = f_params,
       x = rsample
       )
@@ -158,7 +182,13 @@ checkThat <- function(f, f_params, starting_values, sample_size){
       10, lower_bound, upper_bound
     )
   }
-  return(initial_abs)
+
+  out <- list(
+    f_expr = fxp,
+    initial_abs = initial_abs
+  )
+
+  return(out)
 }
 
 
@@ -170,7 +200,7 @@ checkThat <- function(f, f_params, starting_values, sample_size){
 #' @description \code{approxD} approximates the derivative of a specified
 #' function at a specified value using a central finite difference approach.
 #'
-#' @param f The function to evaluate, as a quosure.
+#' @param f The function to evaluate, as an expression.
 #'
 #' @param f_params A \code{list} of any associated parameters of \code{f}.
 #'
@@ -193,15 +223,8 @@ approxD <- function(f,
                    n = 1,
                    h = sqrt(.Machine$double.eps)
                    ) {
-  # Check that proper arguments are supplied
-  #arg_names <- names(formals(f))
-  #f_names <- names(f_params)
 
-  #assertthat::assert_that(
-  #  all(f_names %in% arg_names) == TRUE,
-  #  msg = "Incorrect arguments supplied to density function."
-  #)
-  f <- rlang::quo_get_expr(f)
+  #f <- rlang::quo_get_expr(f)
 
   dx <- abs(x) * h
 
@@ -258,7 +281,7 @@ approxD <- function(f,
 #'
 #' @param x_abs A \code{numeric} vector of length \code{k} for \code{k > 1}.
 #'
-#' @param f A function representing the sampling distribution, as a quosure.
+#' @param f A function representing the sampling distribution, as an expression.
 #'
 #' @param f_params A \code{list} of any associated parameters of \code{f}.
 #'
@@ -271,16 +294,12 @@ approxD <- function(f,
 #'
 #' @keywords internal
 tanIntersect <- function(x_abs, f, f_params = NULL) {
-  assertthat::assert_that(
-    length(x_abs) > 1,
-    msg = 'Must have more than 1 abscissae.'
-  )
 
-  fxp <- rlang::quo_get_expr(f)
-
+  # Set up index
   j_plus_1 <- length(x_abs)
   j <- j_plus_1 - 1
 
+  # Collect density function arguments
   xl <- list(x_abs)
 
   if (!is.null(f_params)){
@@ -288,10 +307,11 @@ tanIntersect <- function(x_abs, f, f_params = NULL) {
       xl,
       values = f_params)
     }
-
+  # Evaluate Density
   gx <- rlang::exec(
-    fxp, !!!xl)
+    f, !!!xl)
 
+  # evaluate Derivatives
   hx <- log(gx)
 
   dhdx <- (1/gx) * approxD(f = f, x = x_abs)

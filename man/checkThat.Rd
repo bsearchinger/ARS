@@ -18,7 +18,8 @@ first derivative is positive.}
 \item{sample_size}{The desired number of samples in the final output.}
 }
 \value{
-A warning or error if certain conditions are detected
+if all checks pass, a named \code{list} is returned containing an
+ expression for the density function, and the initial abscissae values.
 }
 \description{
 \code{checkThat} performs tests and checks to ensure
