@@ -299,6 +299,8 @@ approxD <- function(f,
 #' @keywords internal
 tanIntersect <- function(x_abs, f, f_params = NULL) {
 
+  x_abs <- sort(x_abs)
+
   # Set up index
   j_plus_1 <- length(x_abs)
   j <- j_plus_1 - 1
@@ -318,7 +320,7 @@ tanIntersect <- function(x_abs, f, f_params = NULL) {
   # evaluate Derivatives
   hx <- log(gx)
 
-  dhdx <- (1/gx) * approxD(f = f, x = x_abs)
+  dhdx <- (1/gx) * approxD(f = f, f_params = f_params, x = x_abs)
 
   # Gilks Equation (1)
   z <- (( hx[2:j_plus_1] - hx[1:j] ) - ( x_abs[2:j_plus_1] * dhdx[2:j_plus_1] ) + (
