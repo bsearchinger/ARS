@@ -244,3 +244,52 @@ test_that("checkThat catches invalid sample_size", {
 
 
 
+################################################################################
+# Tests for upperHull: Upper Hull Function
+
+ztest <- c(-0.5, -0.1, 0, 0.1, 0.5)
+test_that("output of upperHull is symmetric for symmetric distribution",{
+  expect_true(
+    all(
+      upperHull(-5:5, ztest, dnorm) == rev(upperHull(-5:5, ztest, dnorm))
+    ) == TRUE
+  )
+})
+
+
+################################################################################
+# Tests for sampleEnv: Sampling from Piecewise Envelope
+
+test_that("sampleEnv returns the correct sample size", {
+  expect_true(
+    length(
+      sampleEnv(10, ztest, dnorm)
+    ) == 10
+  )
+})
+
+test_that("sampleEnv returns finite values", {
+  expect_true(
+    all(
+      is.finite(sampleEnv(10, ztest, dnorm))
+    )
+  )
+})
+
+################################################################################
+# Tests for lowerHull: Lower Hull Function
+
+xtest <- c(-0.25, -0.1, 0.1, 0.25)
+test_that("output of lowerHull is -Inf for out-of-bounds x", {
+  expect_true(
+    lowerHull(-5:5, ztest, dnorm) == -Inf
+  )
+})
+
+test_that("lowerHull is less than or equal to upperHull", {
+  expect_true(
+    all(
+      lowerHull(xtest, ztest, dnorm) <= upperHull(xtest, ztest, dnorm)
+    )
+  )
+})
