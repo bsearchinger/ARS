@@ -268,10 +268,28 @@ test_that("sampleEnv returns the correct sample size", {
   )
 })
 
-test_that("sampleEnv does not return any Infinite or NaN values", {
+test_that("sampleEnv returns finite values", {
   expect_true(
     all(
       is.finite(sampleEnv(10, ztest, dnorm))
+    )
+  )
+})
+
+################################################################################
+# Tests for lowerHull: Lower Hull Function
+
+xtest <- c(-0.25, -0.1, 0.1, 0.25)
+test_that("output of lowerHull is -Inf for out-of-bounds x", {
+  expect_true(
+    lowerHull(-5:5, ztest, dnorm) == -Inf
+  )
+})
+
+test_that("lowerHull is less than or equal to upperHull", {
+  expect_true(
+    all(
+      lowerHull(xtest, ztest, dnorm) <= upperHull(xtest, ztest, dnorm)
     )
   )
 })
