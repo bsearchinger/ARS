@@ -31,6 +31,14 @@
 #' @keywords internal
 checkThat <- function(f, f_params, starting_values, sample_size){
 
+  # Check that f_params is a named list
+  if (!is.null(f_params)){
+    assert_that(
+      !is.null(names(f_params)),
+      msg = 'Density parameters must be in a named list.'
+    )
+  }
+
   # Check Sample Size Argument
   assert_that(
     all(is.numeric(sample_size),
@@ -186,7 +194,7 @@ checkThat <- function(f, f_params, starting_values, sample_size){
   out <- list(
     f_expr = fxp,
     initial_abs = initial_abs
-  )
+    )
 
   return(out)
 }
@@ -230,14 +238,12 @@ approxD <- function(f,
     dx[which(dx == 0)] <- h
   }
   fplus_args <- list(x + dx)
-  #names(fplus_args) <- arg_names[1]
   fplus_args <- append(
     fplus_args,
     values = f_params
   )
 
   fminus_args <- list(x - dx)
-  #names(fminus_args) <- arg_names[1]
   fminus_args <- append(
     fminus_args,
     values = f_params
@@ -521,6 +527,26 @@ lowerHull <- function(x, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
 #' @keywords internal
 
 ars <- function(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
+
+  # Create quosure
+  fquo <- rlang::enquo(f)
+  if (is.character(f)){
+    fsym <- rlang::sym(f)
+    fquo <- rlang::enquo(fsym)
+  }
+
+  # Perform argument checks
+  checkList <- checkThat(
+    f = fquo,
+    f_params = f_params,
+    starting_values = x_abs,
+    sample_size = n
+  )
+
+  # Extract initial abscissae and function expression after checks
+  x_abs <- checkList$initial_abs
+  f <- checkList$f_expr
+
   # initialize values
   vals <- c()
 
