@@ -260,3 +260,18 @@ test_that("output of upperHull is symmetric for symmetric distribution",{
 ################################################################################
 # Tests for sampleEnv: Sampling from Piecewise Envelope
 
+test_that("sampleEnv returns the correct sample size", {
+  expect_true(
+    length(
+      sampleEnv(10, ztest, dnorm)
+    ) == 10
+  )
+})
+
+test_that("sampleEnv does not return any Infinite or NaN values", {
+  expect_true(
+    all(
+      is.finite(sampleEnv(10, ztest, dnorm))
+    )
+  )
+})
