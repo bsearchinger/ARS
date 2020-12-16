@@ -244,3 +244,19 @@ test_that("checkThat catches invalid sample_size", {
 
 
 
+################################################################################
+# Tests for upperHull: Upper Hull Function
+
+ztest <- c(-0.5, -0.1, 0, 0.1, 0.5)
+test_that("output of upperHull is symmetric for symmetric distribution",{
+  expect_true(
+    all(
+      upperHull(-5:5, ztest, dnorm) == rev(upperHull(-5:5, ztest, dnorm))
+    ) == TRUE
+  )
+})
+
+
+################################################################################
+# Tests for sampleEnv: Sampling from Piecewise Envelope
+
