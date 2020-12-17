@@ -242,6 +242,19 @@ test_that("checkThat catches invalid sample_size", {
   )
 })
 
+################################################################################
+# Tests for cavitySearch: log-concavity check function
+test_that("cavitySearch detects non-log-concavity", {
+  expect_false(
+    cavitySearch(
+      f = dt, f_params = list(df = 5, ncp = 0), x = -4)
+    )
+  expect_false(
+    all(
+      cavitySearch(
+        f = dt, f_params = list(df = 5, ncp = 0), x = c(-4, -1, 0, 1))) == TRUE
+  )
+})
 
 
 ################################################################################

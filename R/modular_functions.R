@@ -130,6 +130,14 @@ checkThat <- function(f, f_params, starting_values, sample_size){
       Consider expanding upper bound')
     )
 
+    # Check for log concavity
+    assert_that(
+      all(
+        cavitySearch(f = fxp, f_params = f_params, x = starting_values)
+        ) == TRUE,
+      msg = 'Non-log-concavity detected. Change density or adjust support.'
+      )
+
     initial_abs <- starting_values
   }
   # Generate starting values if none are provided
@@ -151,6 +159,8 @@ checkThat <- function(f, f_params, starting_values, sample_size){
       rfun, !!!rfun_args
     )
 
+    rsample <- sort(rsample)
+
     # Evaluate density at the sample
     rfun_args[[1]] <- rsample
     gx <- rlang::exec(
@@ -170,15 +180,33 @@ checkThat <- function(f, f_params, starting_values, sample_size){
     # Subset between positive and negative derivatives
     positive_vals <- rsample[dhdx > 0]
     negative_vals <- rsample[dhdx < 0]
-    pos_len <- length(positive_vals)
-    neg_len <- length(negative_vals)
+    #pos_len <- length(positive_vals)
+    #neg_len <- length(negative_vals)
 
-    # TODO:clean this up a bit. Check for zero length
-    stopifnot(
-      exprs = {
-        pos_len > 0
-        neg_len > 0
-      }
+    # Check for zero length
+    #stopifnot(
+    #  exprs = {
+    #    pos_len > 0
+    #    neg_len > 0
+    #  }
+    #)
+    assert_that(
+      all(length(positive_vals) > 0,
+          length(negative_vals) > 0) == TRUE,
+      msg = 'Could not find initial values with positive and negative derivatives.'
+    )
+
+    # Find the bounds of log-concavity
+    pvals_cavity <- cavitySearch(f = fxp, f_params = f_params, x = positive_vals)
+    nvals_cavity <- cavitySearch(f = fxp, f_params = f_params, x = negative_vals)
+
+    positive_vals <- positive_vals[pvals_cavity]
+    negative_vals <- negative_vals[nvals_cavity]
+
+    assert_that(
+      all(length(positive_vals) > 0,
+          length(negative_vals) > 0) == TRUE,
+      msg = 'Could not find suitable bounds for log concavity.'
     )
 
     # Use the mean value on either side to determine the boundary
@@ -186,9 +214,9 @@ checkThat <- function(f, f_params, starting_values, sample_size){
     upper_bound <- mean(negative_vals)
 
     # Generate 10 samples from a uniform in this interval
-    initial_abs <- runif(
-      10, lower_bound, upper_bound
-    )
+    initial_abs <- sort(
+      runif(10, lower_bound, upper_bound)
+      )
   }
 
   out <- list(
@@ -314,13 +342,9 @@ cavitySearch <- function(f, f_params, x){
 
   dl2 <- ((fx*dfdx2) - dfdx1^2)/(fx^2)
 
-  if (dl2 < 0){
-    return(TRUE)
-  }
-  else{
-    return(FALSE)
-  }
+  dl2 <- dl2 <= 0
 
+  return(dl2)
 }
 
 
