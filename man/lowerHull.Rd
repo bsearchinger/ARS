@@ -4,7 +4,7 @@
 \alias{lowerHull}
 \title{Compute the Lower Hull}
 \usage{
-lowerHull(x, x_abs, f, f_params = NULL, supp = c(-Inf, Inf))
+lowerHull(x, x_abs, f, f_params = NULL, supp = c(-Inf, Inf), hx = NULL)
 }
 \arguments{
 \item{x}{A \code{numeric} vector representing x values.}
@@ -18,6 +18,8 @@ representing the abscissae.}
 
 \item{supp}{The support of \code{f}, as a two-membered \code{numeric} vector.
 Default is \code{c(-Inf, Inf)}}
+
+\item{hx}{The log of the density \code{f} at point x}
 }
 \value{
 A named \code{list} containing the y-values of the lower hull.

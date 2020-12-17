@@ -4,7 +4,16 @@
 \alias{sampleEnv}
 \title{Sample from the Rejection Envelope}
 \usage{
-sampleEnv(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf))
+sampleEnv(
+  n,
+  x_abs,
+  f,
+  f_params = NULL,
+  supp = c(-Inf, Inf),
+  z = NULL,
+  hx = NULL,
+  dhdx = NULL
+)
 }
 \arguments{
 \item{n}{The number of samples}
@@ -18,6 +27,12 @@ representing the abscissae.}
 
 \item{supp}{The support of \code{f}, as a two-membered \code{numeric} vector.
 Default is \code{c(-Inf, Inf)}}
+
+\item{z}{The tangent intersection points at given abscissae.}
+
+\item{hx}{The log of the density \code{f} at point x}
+
+\item{dhdx}{The derivative of the log of the density \code{f} at point x}
 }
 \value{
 A \code{numeric} vector containing the sampled values.

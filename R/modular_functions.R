@@ -275,6 +275,56 @@ approxD <- function(f,
   }
 }
 
+# Cavity Search ################################################################
+#' @name cavitySearch
+#'
+#' @title Search a function for non-log concavity
+#'
+#' @description \code{cavitySearch} checks that a particular function is
+#'  log-concave
+#'
+#' @param f The function to evaluate, as an expression.
+#'
+#' @param f_params A \code{list} of any associated parameters of \code{f}.
+#'
+#' @param x The value at which to evaluate the derivative of \code{f}.
+#'
+#' @return logical that evaluates to TRUE if the density is log-concave at the
+#'  specified value, and FALSE otherwise.
+#'
+#' @importFrom rlang exec
+#'
+#' @keywords internal
+cavitySearch <- function(f, f_params, x){
+
+  xl <- list(x)
+  if (!is.null(f_params)){
+    xl <- append(
+      xl,
+      values = f_params
+    )
+  }
+
+  fx <- rlang::exec(
+    f, !!!xl
+  )
+
+  dfdx1 <- approxD(f = f, f_params = f_params, x = x)
+  dfdx2 <- approxD(f = f, f_params = f_params, x = x, n = 2)
+
+  dl2 <- ((fx*dfdx2) - dfdx1^2)/(fx^2)
+
+  if (dl2 < 0){
+    return(TRUE)
+  }
+  else{
+    return(FALSE)
+  }
+
+}
+
+
+
 # Tangent Intersection Function ################################################
 #' @name tanIntersect
 #'
@@ -446,15 +496,17 @@ sampleEnv <- function(n,
   z <- z[z >= supp[1] & z <= supp[2]]
 
   # Find the normalization constant
-  norm <- integrate(function(a) exp(upperHull(a, x_abs, f, f_params, supp)),
-                    lower = supp[1],
-                    upper = supp[2])$value
+  norm <- integrate(
+    function(a) exp(upperHull(a, x_abs, f, f_params, supp, z, hx, dhdx)),
+    lower = supp[1],
+    upper = supp[2])$value
 
   # Sample from this CDF using the inverse-CDF method
   # Done by taking CDF at each intersection and then splitting into pieces
-  cdf <- function(x) integrate(function(a) 1/norm *
-                               exp(upperHull(a, x_abs, f, f_params, supp)),
-                               lower = supp[1], upper = x)$value
+  cdf <- function(x) integrate(
+    function(a) 1/norm *exp(upperHull(a, x_abs, f, f_params, supp, z, hx, dhdx)),
+    lower = supp[1], upper = x)$value
+
   z_cdf <- sapply(z, cdf)
   zb <- c(0,z_cdf,1)
   lb <- c(supp[1], z)
