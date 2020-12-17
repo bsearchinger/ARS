@@ -96,7 +96,7 @@ checkThat <- function(f, f_params, starting_values, sample_size){
         values = f_params
       )
     }
-    # # Evaluate density at the sample at starting values
+    # # Evaluate density at starting values
     gx <- rlang::exec(
       fxp, !!!f_args
     )
@@ -586,7 +586,7 @@ ars <- function(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
 
       hx_star <- log(gx)
 
-      dhdx_star <- (1/gx) * approxD(f = f, x = x_abs)
+      dhdx_star <- (1/gx) * approxD(f = f, f_params = f_params, x = x_abs)
 
       # update x_abs
       x_abs <- sort(append(x_abs, x_star))
