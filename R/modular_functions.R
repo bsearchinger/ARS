@@ -366,16 +366,22 @@ upperHull <- function(x,
                       x_abs,
                       f,
                       f_params = NULL,
-                      supp = c(-Inf,Inf)
-                      ) {
-  # Find tangent intersections
-	tans <- tanIntersect(x_abs, f, f_params)
+                      supp = c(-Inf,Inf),
+                      z = NULL,
+                      hx = NULL,
+                      dhdx = NULL) {
+  # Find tangent intersections if not provided
+  if(is.null(z) | is.null(hx) | is.null(dhdx)){
+    tans <- tanIntersect(x_abs, f, f_params)
+    z <- tans$z
+    hx <- tans$hx
+    dhdx <- tans$dhdx
+  }
 
 	# Compute the upper hull
-	z <- tans$z
 	z <- z[z >= supp[1] & z <= supp[2]]
 	idx <- findInterval(x, c(supp[1], z, supp[2])) # indices for each piece
-	u_out <- tans$hx[idx] + (x - x_abs[idx])*tans$dhdx[idx]
+	u_out <- hx[idx] + (x - x_abs[idx]) * dhdx[idx]
 
 	return(u_out)
 }
@@ -412,10 +418,19 @@ sampleEnv <- function(n,
                       x_abs,
                       f,
                       f_params = NULL,
-                      supp = c(-Inf, Inf)) {
-  # Store the values for the tangent intersections
-  tans <- tanIntersect(x_abs, f, f_params)
-  z <- tans$z
+                      supp = c(-Inf, Inf),
+                      z = NULL,
+                      hx = NULL,
+                      dhdx = NULL) {
+  # Store the values for the tangent intersections if not provided
+  if(is.null(z) | is.null(hx) | is.null(dhdx)){
+    tans <- tanIntersect(x_abs, f, f_params)
+    z <- tans$z
+    hx <- tans$hx
+    dhdx <- tans$dhdx
+  }
+
+  # Only select z on the valid interval
   z <- z[z >= supp[1] & z <= supp[2]]
 
   # Find the normalization constant
@@ -425,23 +440,25 @@ sampleEnv <- function(n,
 
   # Sample from this CDF using the inverse-CDF method
   # Done by taking CDF at each intersection and then splitting into pieces
-  cdf <- function(x) integrate(function(a) 1/norm * exp(upperHull(a,x_abs,f,f_params, supp)),
-                               lower = supp[1],
-                               upper = x)$value
+  cdf <- function(x) integrate(function(a) 1/norm *
+                               exp(upperHull(a, x_abs, f, f_params, supp)),
+                               lower = supp[1], upper = x)$value
   z_cdf <- sapply(z, cdf)
   zb <- c(0,z_cdf,1)
   lb <- c(supp[1], z)
   unif_samp <- runif(n)
   idx <- findInterval(unif_samp, zb)
 
-  samp <- (unif_samp - zb[idx]) * tans$dhdx[idx] * norm/exp(tans$hx[idx]) + exp((lb[idx] - x_abs[idx])*tans$dhdx[idx])
-  samp <- x_abs[idx] + log(samp)/tans$dhdx[idx]
+  samp <- (unif_samp - zb[idx]) * dhdx[idx] * norm/exp(hx[idx]) +
+           exp((lb[idx] - x_abs[idx])*dhdx[idx])
+  samp <- x_abs[idx] + log(samp)/dhdx[idx]
   samp <- samp[!is.na(samp)]
 
   while (length(samp)<n) {
     unif_samp <- runif(n)
-    samp_1 <- (unif_samp - zb[idx]) * tans$dhdx[idx] * norm/exp(tans$hx[idx]) + exp((lb[idx] - x_abs[idx])*tans$dhdx[idx])
-    samp_1 <- x_abs[idx] + log(samp)/tans$dhdx[idx]
+    samp_1 <- (unif_samp - zb[idx]) * dhdx[idx] * norm/exp(hx[idx]) +
+               exp((lb[idx] - x_abs[idx])*dhdx[idx])
+    samp_1 <- x_abs[idx] + log(samp)/dhdx[idx]
     samp_1 <- samp_1[!is.na(samp_1)]
     samp <- c(samp, samp_1)
   }
@@ -477,27 +494,36 @@ sampleEnv <- function(n,
 #'
 #' @keywords internal
 
-lowerHull <- function(x, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
-  # need to sort x_abs to find the correct x[j] and x[j+1]
-  x_abs <- sort(x_abs)
+lowerHull <- function(x,
+                      x_abs,
+                      f,
+                      f_params = NULL,
+                      supp = c(-Inf, Inf),
+                      hx = NULL){
+  # Find hx for x_abs if not provided
+  if(is.null(hx)){
+    tans <- tanIntersect(x_abs, f, f_params)
 
-  # find hx for sorted x_abs
-  tans <- tanIntersect(x_abs, f, f_params)
-
-  hx <- tans$hx
-
-  # return -Inf if x is outside of the range of x_abs
-  if(x < min(x_abs) || x > max(x_abs)){
-    lk <- -Inf
+    hx <- tans$hx
   }
-  # find lk for x in the interval [x[j], x[j+1]]
-  else{
-    j <- which(x == sort(append(x_abs, x))) - 1
 
-    lk <- ((x_abs[j+1] - x) * hx[j] + (x - x_abs[j]) * hx[j+1]) /
-      (x_abs[j+1] - x_abs[j])
+  # anonymous function used to vectorize calculations of lk for multiple x
+  lambda <- function(x){
+    # return -Inf if x is outside of the range of x_abs
+    if(x < min(x_abs) || x > max(x_abs)){
+      lk <- -Inf
+    }
+
+    # find lk for x in the interval [x[j], x[j+1]]
+    else{
+      j <- findInterval(x, x_abs, rightmost.closed = T)
+
+      lk <- ((x_abs[j+1] - x) * hx[j] + (x - x_abs[j]) * hx[j+1]) /
+        (x_abs[j+1] - x_abs[j])
+    }
+    return(lk)
   }
-  return(lk)
+  sapply(x, lambda)
 }
 
 # Adaptive Rejection Sampling Function #########################################
@@ -552,26 +578,29 @@ ars <- function(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
   # initialize values
   vals <- c()
 
-  k <- 1
+  k <- i <- m <- 1
+
+  tans <- tanIntersect(x_abs, f, f_params)
+
+  z <- tans$z
+
+  hx <- tans$hx
+
+  dhdx <- tans$dhdx
 
   while(length(vals) < n){
     # find hx for each iteration. Only needs to recalculate if x_abs changes
-    x_abs <- sort(x_abs)
-
-    tans <- tanIntersect(x_abs, f, f_params)
-
-    hx <- tans$hx
 
     # sample x* from s(x)
-    x_star <- sampleEnv(1, x_abs, f, f_params, supp)
+    x_star <- sampleEnv(1, x_abs, f, f_params, supp, z, hx, dhdx)
 
     # sample w from unif(0,1)
     w <- runif(1)
 
     # find lower and upper hull values for x*
-    lx_star <- lowerHull(x_star, x_abs, f, f_params, supp)
+    lx_star <- lowerHull(x_star, x_abs, f, f_params, supp, hx)
 
-    ux_star <- upperHull(x_star, x_abs, f, f_params, supp)
+    ux_star <- upperHull(x_star, x_abs, f, f_params, supp, z, hx, dhdx)
 
     # initial test for acceptance
     if(w <= exp(lx_star - ux_star)){
@@ -591,14 +620,33 @@ ars <- function(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
       # update x_abs
       x_abs <- sort(append(x_abs, x_star))
 
-      # iterate k
+      # recalculate z, hx, dhdx with updated x_abs
+      tans <- tanIntersect(x_abs, f, f_params)
+
+      z <- tans$z
+
+      hx <- tans$hx
+
+      dhdx <- tans$dhdx
+
+      # find index of x* for second rejection test
+      id <- which(x_abs == x_star)
+
+      # iterate k, the count of abscissae added
       k <- k + 1
 
       # perform second rejection test
-      if(w <= exp(hx_star - ux_star)){
+      if(w <= exp(hx[id] - ux_star)){
         vals <- append(vals, x_star)
       }
+
+      else{
+        # iterate m, the count of rejected samples
+        m <- m + 1
+      }
     }
+    # iterate i, the count of total iterations of the ars function
+    i <- i + 1
   }
-  return(vals)
+  return(c(vals, "k" = k,"i" = i, "m" = m))
 }
