@@ -356,6 +356,12 @@ tanIntersect <- function(x_abs, f, f_params = NULL) {
 #' @param supp The support of \code{f}, as a two-membered \code{numeric} vector.
 #' Default is \code{c(-Inf, Inf)}
 #'
+#' @param z The tangent intersection points at given abscissae.
+#'
+#' @param hx The log of the density \code{f} at point x
+#'
+#' @param dhdx The derivative of the log of the density \code{f} at point x
+#'
 #' @return A named \code{list} containing the y-values of the upper hull.
 #'
 #' @import assertthat
@@ -406,6 +412,12 @@ upperHull <- function(x,
 #'
 #' @param supp The support of \code{f}, as a two-membered \code{numeric} vector.
 #' Default is \code{c(-Inf, Inf)}
+#'
+#' @param z The tangent intersection points at given abscissae.
+#'
+#' @param hx The log of the density \code{f} at point x
+#'
+#' @param dhdx The derivative of the log of the density \code{f} at point x
 #'
 #' @return A \code{numeric} vector containing the sampled values.
 #'
@@ -487,6 +499,8 @@ sampleEnv <- function(n,
 #'
 #' @param supp The support of \code{f}, as a two-membered \code{numeric} vector.
 #' Default is \code{c(-Inf, Inf)}
+#'
+#' @param hx The log of the density \code{f} at point x
 #'
 #' @return A named \code{list} containing the y-values of the lower hull.
 #'
