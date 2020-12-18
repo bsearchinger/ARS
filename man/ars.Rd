@@ -4,7 +4,7 @@
 \alias{ars}
 \title{Perform Adaptive Rejection Sampling}
 \usage{
-ars(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf))
+ars(n, x_abs = NULL, f, f_params = NULL, supp = c(-Inf, Inf))
 }
 \arguments{
 \item{n}{The number of samples to return}
