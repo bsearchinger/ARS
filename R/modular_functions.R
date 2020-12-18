@@ -678,7 +678,7 @@ lowerHull <- function(x,
 #' @import assertthat
 #' @importFrom rlang exec
 #'
-#' @keywords internal
+#' @export
 ars <- function(n, x_abs = NULL, f, f_params = NULL, supp = c(-Inf, Inf)){
 
   # Create quosure

@@ -27,4 +27,3 @@ A named \code{list} containing the y-values of the upper hull.
 from a given density \code{f}, initialized at the given abscissae
 \code{x_abs}.
 }
-\keyword{internal}
