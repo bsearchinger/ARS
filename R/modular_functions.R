@@ -755,5 +755,5 @@ ars <- function(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
     # iterate i, the count of total iterations of the ars function
     i <- i + 1
   }
-  return(c(vals, "k" = k,"i" = i, "m" = m))
+  return(list(vals = vals, k = k,i = i, m = m))
 }
