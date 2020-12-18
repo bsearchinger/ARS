@@ -20,8 +20,12 @@
 #'
 #' @param sample_size The desired number of samples in the final output.
 #'
+#' @param supp The support of the sampling density.
+#'
 #' @return if all checks pass, a named \code{list} is returned containing an
-#'  expression for the density function, and the initial abscissae values.
+#'  expression for the density function, the initial abscissae values, and the
+#'  support of the density which may be determined by the function if no
+#'  initial values were supplied.
 #'
 #' @import assertthat
 #' @importFrom rlang exec quo_get_expr as_label
@@ -29,7 +33,7 @@
 #' @importFrom stats runif
 #'
 #' @keywords internal
-checkThat <- function(f, f_params, starting_values, sample_size){
+checkThat <- function(f, f_params, starting_values, sample_size, supp){
 
   # Check that f_params is a named list
   if (!is.null(f_params)){
@@ -85,7 +89,15 @@ checkThat <- function(f, f_params, starting_values, sample_size){
   if (!is.null(starting_values)){
     assert_that(
       length(starting_values) >= 2,
-      msg = "Must have at least 2 initial abscissae."
+      msg = "Must have at least 2 initial x_abs values."
+    )
+    # Check that values are within the bounds of the support
+    assert_that(
+      all(
+        min(starting_values) > min(supp),
+        max(starting_values) < max(supp)
+      ) == TRUE,
+      msg = "Some x_abs are outside the range of the support."
     )
     # Check that abscissae have both positive and negative derivative values
     f_args <- list(starting_values)
@@ -111,7 +123,7 @@ checkThat <- function(f, f_params, starting_values, sample_size){
     dhdx <- dgdx/gx
     assert_that(
       any(is.nan(dhdx)) == FALSE,
-      msg = "Some starting values are not in the range of the density."
+      msg = "Some starting values have derivative too close to 0."
     )
 
     positive_vals <- starting_values[dhdx > 0]
@@ -147,7 +159,7 @@ checkThat <- function(f, f_params, starting_values, sample_size){
     rfun <- stringr::str_replace(
       fun_expr, 'd', 'r'
     )
-    rfun_args = list(100)
+    rfun_args = list(1000)
     if(!is.null(f_params)){
       rfun_args <- append(
         rfun_args,
@@ -160,6 +172,9 @@ checkThat <- function(f, f_params, starting_values, sample_size){
     )
 
     rsample <- sort(rsample)
+
+    # Subset only values within the provided support
+    rsample <- rsample[rsample > supp[1] & rsample < supp[2]]
 
     # Evaluate density at the sample
     rfun_args[[1]] <- rsample
@@ -213,6 +228,9 @@ checkThat <- function(f, f_params, starting_values, sample_size){
     lower_bound <- mean(positive_vals)
     upper_bound <- mean(negative_vals)
 
+    # Redefine support as the interval on which the function is log-concave
+    supp <- c(min(positive_vals), max(negative_vals))
+
     # Generate 10 samples from a uniform in this interval
     initial_abs <- sort(
       runif(10, lower_bound, upper_bound)
@@ -221,7 +239,8 @@ checkThat <- function(f, f_params, starting_values, sample_size){
 
   out <- list(
     f_expr = fxp,
-    initial_abs = initial_abs
+    initial_abs = initial_abs,
+    supp = supp
     )
 
   return(out)
@@ -658,7 +677,8 @@ ars <- function(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
     f = fquo,
     f_params = f_params,
     starting_values = x_abs,
-    sample_size = n
+    sample_size = n,
+    supp = supp
   )
 
   # Extract initial abscissae and function expression after checks

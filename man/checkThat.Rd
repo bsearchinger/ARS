@@ -4,7 +4,7 @@
 \alias{checkThat}
 \title{Check arguments of the call to ars.}
 \usage{
-checkThat(f, f_params, starting_values, sample_size)
+checkThat(f, f_params, starting_values, sample_size, supp)
 }
 \arguments{
 \item{f}{A function quosure representing the target sampling distribution.}
@@ -16,10 +16,14 @@ values will be determined using the bounds of the log-distribution where the
 first derivative is positive.}
 
 \item{sample_size}{The desired number of samples in the final output.}
+
+\item{supp}{The support of the sampling density.}
 }
 \value{
 if all checks pass, a named \code{list} is returned containing an
- expression for the density function, and the initial abscissae values.
+ expression for the density function, the initial abscissae values, and the
+ support of the density which may be determined by the function if no
+ initial values were supplied.
 }
 \description{
 \code{checkThat} performs tests and checks to ensure
