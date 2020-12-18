@@ -72,8 +72,8 @@ test_that("output of tanIntersect is symmetric for symmetric distribution",{
   expect_true(
     all(
       tanIntersect(ztest, dnorm)$z[1:2] == -1*rev(tanIntersect(ztest, dnorm)$z[3:4])
-      ) == TRUE
-    )
+    ) == TRUE
+  )
 })
 
 test_that("output of tanIntersect is correct dimensions", {
@@ -83,7 +83,7 @@ test_that("output of tanIntersect is correct dimensions", {
         x_abs = xtest,
         f = dexp,
         f_params = list(rate = 2))$z
-      ) == 19
+    ) == 19
   )
   expect_true(
     length(
@@ -91,7 +91,7 @@ test_that("output of tanIntersect is correct dimensions", {
         x_abs = xtest,
         f = dexp,
         f_params = list(rate = 2)
-        )) == 4
+      )) == 4
   )
 })
 
@@ -245,7 +245,7 @@ test_that("cavitySearch detects non-log-concavity", {
   expect_false(
     cavitySearch(
       f = dt, f_params = list(df = 5, ncp = 0), x = -4)
-    )
+  )
   expect_false(
     all(
       cavitySearch(
@@ -274,9 +274,9 @@ test_that("upperHull bounds the log-distribution from above", {
   )
   expect_true(
     all(
-      upperHull(0:50/10, 
-                1:10/3, 
-                dgamma, 
+      upperHull(0:50/10,
+                1:10/3,
+                dgamma,
                 f_params = list(shape = 4, rate = 2)) >= dgamma(0:50/10, 4, 2, log = T)
     )
   )
@@ -330,20 +330,20 @@ test_that("output of lowerHull is -Inf for out-of-bounds x", {
 test_that("lowerHull is less than or equal to upperHull", {
   expect_true(
     all(
-      signif(lowerHull(xtest, ztest, dnorm), digits = 7) <= 
+      signif(lowerHull(xtest, ztest, dnorm), digits = 7) <=
         signif(upperHull(xtest, ztest, dnorm), digits = 7)
     )
   )
   expect_true(
     all(
-      signif(lowerHull(0:50/10, 
-                1:10/3, 
-                dgamma, 
-                f_params = list(shape = 4, rate = 2)), digits = 7) <=
-        signif(upperHull(0:50/10, 
-                  1:10/3, 
-                  dgamma, 
-                  f_params = list(shape = 4, rate = 2)), digits = 7)
+      signif(lowerHull(0:50/10,
+                       1:10/3,
+                       dgamma,
+                       f_params = list(shape = 4, rate = 2)), digits = 7) <=
+        signif(upperHull(0:50/10,
+                         1:10/3,
+                         dgamma,
+                         f_params = list(shape = 4, rate = 2)), digits = 7)
     )
   )
 })
@@ -351,17 +351,17 @@ test_that("lowerHull is less than or equal to upperHull", {
 test_that("lowerHull bounds the log-distribution from below", {
   expect_true(
     all(
-      signif(lowerHull(-10:10/10, ztest, dnorm), digits = 7) <= 
+      signif(lowerHull(-10:10/10, ztest, dnorm), digits = 7) <=
         signif(dnorm(-10:10/10, log = T), digits = 7)
     )
   )
   expect_true(
     all(
-     signif(lowerHull(0:50/10, 
-                1:10/3, 
-                dgamma, 
-                f_params = list(shape = 4, rate = 2)), digits = 7) <= 
-       signif(dgamma(0:50/10, 4, 2, log = T), digits = 7)
+      signif(lowerHull(0:50/10,
+                       1:10/3,
+                       dgamma,
+                       f_params = list(shape = 4, rate = 2)), digits = 7) <=
+        signif(dgamma(0:50/10, 4, 2, log = T), digits = 7)
     )
   )
 })
@@ -388,9 +388,9 @@ test_that("ars returns expected results for normal(0,1)", {
         mean = 0,
         sd = 1),
       supp = c(-Inf, Inf)
-      )$vals, digits = 7),
+    )$vals, digits = 7),
     expected_norm_0_1
-    )
+  )
 })
 
 set.seed(1)
@@ -458,8 +458,8 @@ test_that("Non-log-concave distirbutions are caught", {
         df = 10,
         ncp = 0),
       supp = c(-Inf, Inf)
-      )
     )
+  )
   expect_error(
     ars(
       n = 5,

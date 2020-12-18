@@ -39,6 +39,6 @@ A named \code{list} containing the y-values of the upper hull.
 }
 \description{
 \code{upperHull} calculates the y-values corresponding to the
-upper hull formed from the tangents to a function
+upper hull formed from the tangents to a function.
 }
 \keyword{internal}
