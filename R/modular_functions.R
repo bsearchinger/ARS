@@ -696,8 +696,6 @@ ars <- function(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
   dhdx <- tans$dhdx
 
   while(length(vals) < n){
-    # find hx for each iteration. Only needs to recalculate if x_abs changes
-
     # sample x* from s(x)
     x_star <- sampleEnv(1, x_abs, f, f_params, supp, z, hx, dhdx)
 
@@ -713,17 +711,8 @@ ars <- function(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
     if(w <= exp(lx_star - ux_star)){
       vals <- append(vals, x_star)
     }
-    # calculate h(x*) and h'(x*) if x* isn't at first accepted
-    ## we're currently not using the updated h'(x*)
+
     else{
-      xl_star <- append(x_star, f_params)
-
-      gx <- rlang::exec(f, !!!xl_star)
-
-      hx_star <- log(gx)
-
-      dhdx_star <- (1/gx) * approxD(f = f, f_params = f_params, x = x_abs)
-
       # update x_abs
       x_abs <- sort(append(x_abs, x_star))
 
