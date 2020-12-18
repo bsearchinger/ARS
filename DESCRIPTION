@@ -18,3 +18,5 @@ Imports:
     Deriv,
     stats,
     stringr
+Suggests:
+    testthat
