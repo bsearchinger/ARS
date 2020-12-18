@@ -547,6 +547,8 @@ sampleEnv <- function(n,
     function(a) 1/norm *exp(upperHull(a, x_abs, f, f_params, supp, z, hx, dhdx)),
     lower = supp[1], upper = x)$value
 
+  # fixes invalid integral approximations
+  z[z > 1] <- 1
   z_cdf <- sapply(z, cdf)
   zb <- c(0,z_cdf,1)
   lb <- c(supp[1], z)
