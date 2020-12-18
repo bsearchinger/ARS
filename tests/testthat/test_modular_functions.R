@@ -269,6 +269,22 @@ test_that("output of upperHull is symmetric for symmetric distribution",{
   )
 })
 
+test_that("upperHull bounds the log-distribution from above", {
+  expect_true(
+    all(
+      upperHull(-10:10/10, ztest, dnorm) >= dnorm(-10:10/10, log = T)
+    )
+  )
+  expect_true(
+    all(
+      upperHull(0:50/10, 
+                1:10/3, 
+                dgamma, 
+                f_params = list(shape = 4, rate = 2)) >= dgamma(0:50/10, 4, 2, log = T)
+    )
+  )
+})
+
 
 ################################################################################
 # Tests for sampleEnv: Sampling from Piecewise Envelope
@@ -318,6 +334,34 @@ test_that("lowerHull is less than or equal to upperHull", {
   expect_true(
     all(
       lowerHull(xtest, ztest, dnorm) <= upperHull(xtest, ztest, dnorm)
+    )
+  )
+  expect_true(
+    all(
+      lowerHull(0:50/10, 
+                1:10/3, 
+                dgamma, 
+                f_params = list(shape = 4, rate = 2)) <=
+        upperHull(0:50/10, 
+                  1:10/3, 
+                  dgamma, 
+                  f_params = list(shape = 4, rate = 2))
+    )
+  )
+})
+
+test_that("lowerHull bounds the log-distribution from below", {
+  expect_true(
+    all(
+      lowerHull(-10:10/10, ztest, dnorm) <= dnorm(-10:10/10, log = T)
+    )
+  )
+  expect_true(
+    all(
+      lowerHull(0:50/10, 
+                1:10/3, 
+                dgamma, 
+                f_params = list(shape = 4, rate = 2)) <= dgamma(0:50/10, 4, 2, log = T)
     )
   )
 })
