@@ -94,8 +94,8 @@ checkThat <- function(f, f_params, starting_values, sample_size, supp){
     # Check that values are within the bounds of the support
     assert_that(
       all(
-        min(starting_values) > min(supp),
-        max(starting_values) < max(supp)
+        min(starting_values) >= min(supp),
+        max(starting_values) <= max(supp)
       ) == TRUE,
       msg = "Some x_abs are outside the range of the support."
     )
@@ -122,12 +122,14 @@ checkThat <- function(f, f_params, starting_values, sample_size, supp){
     # Deriv of log
     dhdx <- dgdx/gx
     assert_that(
-      any(is.nan(dhdx)) == FALSE,
-      msg = "Some starting values have derivative too close to 0."
+      all(
+        any(is.nan(dhdx)) == FALSE,
+        any(is.infinite(dhdx)) == FALSE),
+      msg = "Some starting values have undefined derivatives"
     )
 
-    positive_vals <- starting_values[dhdx > 0]
-    negative_vals <- starting_values[dhdx < 0]
+    positive_vals <- starting_values[dhdx >= 0]
+    negative_vals <- starting_values[dhdx <= 0]
 
     assert_that(
       length(positive_vals) > 0,
@@ -150,7 +152,7 @@ checkThat <- function(f, f_params, starting_values, sample_size, supp){
       msg = 'Non-log-concavity detected. Change density or adjust support.'
       )
 
-    initial_abs <- starting_values
+    initial_abs <- sort(starting_values)
   }
   # Generate starting values if none are provided
   else{
@@ -664,7 +666,7 @@ lowerHull <- function(x,
 #'
 #' @keywords internal
 
-ars <- function(n, x_abs, f, f_params = NULL, supp = c(-Inf, Inf)){
+ars <- function(n, x_abs = NULL, f, f_params = NULL, supp = c(-Inf, Inf)){
 
   # Create quosure
   fquo <- rlang::enquo(f)
