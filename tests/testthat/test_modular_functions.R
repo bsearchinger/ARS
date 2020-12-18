@@ -22,13 +22,6 @@ test_that(
       dtest_log(2)[1])
     expect_equivalent(
       approxD(
-        f = log,
-        x = 2,
-        f_params = NULL,
-        n = 2),
-      dtest_log2(2)[1])
-    expect_equivalent(
-      approxD(
         f = exp,
         x = 2,
         f_params = NULL,
@@ -110,13 +103,14 @@ dexp_quo <- rlang::quo(dexp)
 dnorm_quo <- rlang::quo(dnorm)
 dgamma_quo <- rlang::quo(dgamma)
 
-test_that("checkThat runs silently for correct imputs", {
+test_that("checkThat runs silently for correct inputs", {
   expect_silent(
     checkThat(
       f = dnorm_quo,
       f_params = list(mean = 0, sd = 1),
       starting_values = c(-0.5, -0.1, 0, 0.1, 0.5),
-      sample_size = 30
+      sample_size = 30,
+      supp = c(-Inf, Inf)
     )
   )
   expect_silent(
@@ -124,7 +118,8 @@ test_that("checkThat runs silently for correct imputs", {
       f = dnorm_quo,
       f_params = NULL,
       starting_values = c(-0.5, -0.1, 0, 0.1, 0.5),
-      sample_size = 30
+      sample_size = 30,
+      supp = c(-Inf, Inf)
     )
   )
   expect_silent(
@@ -132,7 +127,8 @@ test_that("checkThat runs silently for correct imputs", {
       f = dnorm_quo,
       f_params =  list(mean = 0, sd = 1),
       starting_values = NULL,
-      sample_size = 30
+      sample_size = 30,
+      supp = c(-Inf, Inf)
     )
   )
   expect_silent(
@@ -140,7 +136,8 @@ test_that("checkThat runs silently for correct imputs", {
       f = dnorm_quo,
       f_params =  NULL,
       starting_values = NULL,
-      sample_size = 30
+      sample_size = 30,
+      supp = c(-Inf, Inf)
     )
   )
 })
