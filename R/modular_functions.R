@@ -166,7 +166,7 @@ checkThat <- function(f, f_params, starting_values, sample_size, supp){
         values = f_params
       )
     }
-    # Sample 100 values from provided density
+    # Sample 1000 values from provided density
     rsample <- rlang::exec(
       rfun, !!!rfun_args
     )
@@ -195,16 +195,8 @@ checkThat <- function(f, f_params, starting_values, sample_size, supp){
     # Subset between positive and negative derivatives
     positive_vals <- rsample[dhdx > 0]
     negative_vals <- rsample[dhdx < 0]
-    #pos_len <- length(positive_vals)
-    #neg_len <- length(negative_vals)
 
     # Check for zero length
-    #stopifnot(
-    #  exprs = {
-    #    pos_len > 0
-    #    neg_len > 0
-    #  }
-    #)
     assert_that(
       all(length(positive_vals) > 0,
           length(negative_vals) > 0) == TRUE,
@@ -224,12 +216,12 @@ checkThat <- function(f, f_params, starting_values, sample_size, supp){
       msg = 'Could not find suitable bounds for log concavity.'
     )
 
-    # Use the mean value on either side to determine the boundary
-    lower_bound <- mean(positive_vals)
-    upper_bound <- mean(negative_vals)
+    # Use the min/maxs on either side to determine the bounds
+    lower_bound <- min(positive_vals)
+    upper_bound <- max(negative_vals)
 
     # Redefine support as the interval on which the function is log-concave
-    supp <- c(min(positive_vals), max(negative_vals))
+    supp <- c(lower_bound, upper_bound)
 
     # Generate 10 samples from a uniform in this interval
     initial_abs <- sort(
@@ -279,7 +271,12 @@ approxD <- function(f,
                     h = sqrt(.Machine$double.eps)
 ) {
 
-  dx <- abs(x) * h
+  if (n == 1) {
+    dx <- abs(x) * h
+  }
+  else{
+    dx <-  abs(x) * ((.Machine$double.eps)^(1/3))
+  }
 
   if (any(dx == 0)){
     dx[which(dx == 0)] <- h
