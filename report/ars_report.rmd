@@ -58,7 +58,7 @@ Our results for the number of iterations to achieve one sample from the standard
 ```{r}
 read.csv('./table.csv', sep = ',')
 ```
-Our results are generally consistent with Gilks et. al. with the caveat that we're counting iterations rather than evaluations of $h(x)$, so our results skew slightly lower. We also use 500 simulations instead of 1000 due to memory and time constraints, so there's more variability in our result. Our conclusion is the same, that the starting $(x_1, x_2) = (-1, 1)$ is ideal for the standard normal distribution.
+Our results are generally consistent with Gilks et. al. with the caveat that we're counting iterations rather than evaluations of $h(x)$, so our results skew slightly lower. We also use 100 simulations instead of 1000 due to memory and time constraints, so there's more variability in our result. Our conclusion is the same, that the starting $(x_1, x_2) = (-1, 1)$ is ideal for the standard normal distribution.
 
 # Individual Contributions
 
