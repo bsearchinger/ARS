@@ -375,7 +375,8 @@ cavitySearch <- function(f, f_params, x){
 #' @description \code{tanIntersect} calculates the x-values corresponding to the
 #' intersections of subsequent tangent lines of a function.
 #'
-#' @param x_abs A \code{numeric} vector of length \code{k} for \code{k > 1}.
+#' @param x_abs A \code{numeric} vector of length \code{k} for \code{k > 1},
+#' representing the abscissae.
 #'
 #' @param f A function representing the sampling distribution, as an expression.
 #'
@@ -434,7 +435,7 @@ tanIntersect <- function(x_abs, f, f_params = NULL) {
 #' @title Compute the Upper Hull
 #'
 #' @description \code{upperHull} calculates the y-values corresponding to the
-#' upper hull formed from the tangents to a function
+#' upper hull formed from the tangents to a function.
 #'
 #' @param x A \code{numeric} vector representing x values
 #'
@@ -562,14 +563,14 @@ sampleEnv <- function(n,
   samp <- (unif_samp - zb[idx]) * dhdx[idx] * norm/exp(hx[idx]) +
            exp((lb[idx] - x_abs[idx])*dhdx[idx])
   samp <- x_abs[idx] + log(samp)/dhdx[idx]
-  samp <- samp[!is.na(samp)]
+  samp <- samp[is.finite(samp)]
 
   while (length(samp)<n) {
     unif_samp <- runif(n)
     samp_1 <- (unif_samp - zb[idx]) * dhdx[idx] * norm/exp(hx[idx]) +
                exp((lb[idx] - x_abs[idx])*dhdx[idx])
     samp_1 <- x_abs[idx] + log(samp)/dhdx[idx]
-    samp_1 <- samp_1[!is.na(samp_1)]
+    samp_1 <- samp_1[is.finite(samp_1)]
     samp <- c(samp, samp_1)
   }
 
@@ -665,7 +666,6 @@ lowerHull <- function(x,
 #' @importFrom rlang exec
 #'
 #' @keywords internal
-
 ars <- function(n, x_abs = NULL, f, f_params = NULL, supp = c(-Inf, Inf)){
 
   # Create quosure

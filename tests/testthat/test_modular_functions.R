@@ -76,7 +76,7 @@ test_that("output of tanIntersect is symmetric for symmetric distribution",{
     )
 })
 
-test_that("output of tanIntersect is corrent dimensions", {
+test_that("output of tanIntersect is correct dimensions", {
   expect_true(
     length(
       tanIntersect(
@@ -266,15 +266,46 @@ test_that("output of upperHull is symmetric for symmetric distribution",{
   )
 })
 
+test_that("upperHull bounds the log-distribution from above", {
+  expect_true(
+    all(
+      upperHull(-10:10/10, ztest, dnorm) >= dnorm(-10:10/10, log = T)
+    )
+  )
+  expect_true(
+    all(
+      upperHull(0:50/10, 
+                1:10/3, 
+                dgamma, 
+                f_params = list(shape = 4, rate = 2)) >= dgamma(0:50/10, 4, 2, log = T)
+    )
+  )
+})
+
 
 ################################################################################
 # Tests for sampleEnv: Sampling from Piecewise Envelope
 
 test_that("sampleEnv returns the correct sample size", {
-  expect_true(
-    length(
-      sampleEnv(10, ztest, dnorm)
-    ) == 10
+  expect_length(
+    sampleEnv(10, ztest, dnorm),
+    10
+  )
+  expect_length(
+    sampleEnv(10, 1:10/3, dgamma, f_params = list(shape = 4, rate = 2)),
+    10
+  )
+})
+
+test_that("sampleEnv works with several known distributions", {
+  expect_silent(
+    sampleEnv(10, ztest, dnorm)
+  )
+  expect_silent(
+    sampleEnv(10, 1:10/3, dchisq, f_params = list(df = 4))
+  )
+  expect_silent(
+    sampleEnv(10, 1:10/3, dgamma, f_params = list(shape = 4, rate = 2))
   )
 })
 
@@ -292,14 +323,45 @@ test_that("sampleEnv returns finite values", {
 xtest <- c(-0.25, -0.1, 0.1, 0.25)
 test_that("output of lowerHull is -Inf for out-of-bounds x", {
   expect_true(
-    lowerHull(-5:5, ztest, dnorm) == -Inf
+    lowerHull(-5, ztest, dnorm) == -Inf
   )
 })
 
 test_that("lowerHull is less than or equal to upperHull", {
   expect_true(
     all(
-      lowerHull(xtest, ztest, dnorm) <= upperHull(xtest, ztest, dnorm)
+      signif(lowerHull(xtest, ztest, dnorm), digits = 7) <= 
+        signif(upperHull(xtest, ztest, dnorm), digits = 7)
+    )
+  )
+  expect_true(
+    all(
+      signif(lowerHull(0:50/10, 
+                1:10/3, 
+                dgamma, 
+                f_params = list(shape = 4, rate = 2)), digits = 7) <=
+        signif(upperHull(0:50/10, 
+                  1:10/3, 
+                  dgamma, 
+                  f_params = list(shape = 4, rate = 2)), digits = 7)
+    )
+  )
+})
+
+test_that("lowerHull bounds the log-distribution from below", {
+  expect_true(
+    all(
+      signif(lowerHull(-10:10/10, ztest, dnorm), digits = 7) <= 
+        signif(dnorm(-10:10/10, log = T), digits = 7)
+    )
+  )
+  expect_true(
+    all(
+     signif(lowerHull(0:50/10, 
+                1:10/3, 
+                dgamma, 
+                f_params = list(shape = 4, rate = 2)), digits = 7) <= 
+       signif(dgamma(0:50/10, 4, 2, log = T), digits = 7)
     )
   )
 })
