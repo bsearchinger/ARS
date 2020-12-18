@@ -479,6 +479,11 @@ upperHull <- function(x,
 
 	# Compute the upper hull
 	z <- z[z >= supp[1] & z <= supp[2]]
+	assert_that(
+	  any(is.na(z)) == FALSE,
+	  msg = "Non-compatible tangent intersection points detected."
+	)
+	z <- sort(z)
 	idx <- findInterval(x, c(supp[1], z, supp[2])) # indices for each piece
 	u_out <- hx[idx] + (x - x_abs[idx]) * dhdx[idx]
 
@@ -555,6 +560,14 @@ sampleEnv <- function(n,
   # fix numerical approximation errors where z_cdf is slightly > 1 or < 0
   z_cdf[z_cdf > 1] <- 1
   z_cdf[z_cdf < 0] <- 0
+
+  # Check for NAs in z_cdf
+  assert_that(
+    any(is.na(z_cdf)) == FALSE,
+    msg = "Non-compatible tangent intersection points detected."
+  )
+
+  z_cdf <- sort(z_cdf)
   zb <- c(0,z_cdf,1)
   lb <- c(supp[1], z)
   unif_samp <- runif(n)
@@ -569,7 +582,7 @@ sampleEnv <- function(n,
     unif_samp <- runif(n)
     samp_1 <- (unif_samp - zb[idx]) * dhdx[idx] * norm/exp(hx[idx]) +
                exp((lb[idx] - x_abs[idx])*dhdx[idx])
-    samp_1 <- x_abs[idx] + log(samp)/dhdx[idx]
+    samp_1 <- x_abs[idx] + log(samp_1)/dhdx[idx]
     samp_1 <- samp_1[is.finite(samp_1)]
     samp <- c(samp, samp_1)
   }
@@ -715,6 +728,10 @@ ars <- function(n, x_abs = NULL, f, f_params = NULL, supp = c(-Inf, Inf)){
 
     # initial test for acceptance
     if(w <= exp(lx_star - ux_star)){
+      assert_that(
+        cavitySearch(f = f, f_params = f_params, x_star),
+        msg = paste('Non-log-concavity detected at x = ', x_star)
+      )
       vals <- append(vals, x_star)
     }
 
@@ -739,6 +756,10 @@ ars <- function(n, x_abs = NULL, f, f_params = NULL, supp = c(-Inf, Inf)){
 
       # perform second rejection test
       if(w <= exp(hx[id] - ux_star)){
+        assert_that(
+          cavitySearch(f = f, f_params = f_params, x_star),
+          msg = paste('Non-log-concavity detected at x = ', x_star)
+        )
         vals <- append(vals, x_star)
       }
 
