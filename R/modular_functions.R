@@ -373,7 +373,8 @@ cavitySearch <- function(f, f_params, x){
 #' @description \code{tanIntersect} calculates the x-values corresponding to the
 #' intersections of subsequent tangent lines of a function.
 #'
-#' @param x_abs A \code{numeric} vector of length \code{k} for \code{k > 1}.
+#' @param x_abs A \code{numeric} vector of length \code{k} for \code{k > 1},
+#' representing the abscissae.
 #'
 #' @param f A function representing the sampling distribution, as an expression.
 #'
@@ -432,7 +433,7 @@ tanIntersect <- function(x_abs, f, f_params = NULL) {
 #' @title Compute the Upper Hull
 #'
 #' @description \code{upperHull} calculates the y-values corresponding to the
-#' upper hull formed from the tangents to a function
+#' upper hull formed from the tangents to a function.
 #'
 #' @param x A \code{numeric} vector representing x values
 #'

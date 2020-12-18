@@ -333,19 +333,20 @@ test_that("output of lowerHull is -Inf for out-of-bounds x", {
 test_that("lowerHull is less than or equal to upperHull", {
   expect_true(
     all(
-      lowerHull(xtest, ztest, dnorm) <= upperHull(xtest, ztest, dnorm)
+      signif(lowerHull(xtest, ztest, dnorm), digits = 7) <= 
+        signif(upperHull(xtest, ztest, dnorm), digits = 7)
     )
   )
   expect_true(
     all(
-      lowerHull(0:50/10, 
+      signif(lowerHull(0:50/10, 
                 1:10/3, 
                 dgamma, 
-                f_params = list(shape = 4, rate = 2)) <=
-        upperHull(0:50/10, 
+                f_params = list(shape = 4, rate = 2)), digits = 7) <=
+        signif(upperHull(0:50/10, 
                   1:10/3, 
                   dgamma, 
-                  f_params = list(shape = 4, rate = 2))
+                  f_params = list(shape = 4, rate = 2)), digits = 7)
     )
   )
 })
@@ -353,15 +354,17 @@ test_that("lowerHull is less than or equal to upperHull", {
 test_that("lowerHull bounds the log-distribution from below", {
   expect_true(
     all(
-      lowerHull(-10:10/10, ztest, dnorm) <= dnorm(-10:10/10, log = T)
+      signif(lowerHull(-10:10/10, ztest, dnorm), digits = 7) <= 
+        signif(dnorm(-10:10/10, log = T), digits = 7)
     )
   )
   expect_true(
     all(
-      lowerHull(0:50/10, 
+     signif(lowerHull(0:50/10, 
                 1:10/3, 
                 dgamma, 
-                f_params = list(shape = 4, rate = 2)) <= dgamma(0:50/10, 4, 2, log = T)
+                f_params = list(shape = 4, rate = 2)), digits = 7) <= 
+       signif(dgamma(0:50/10, 4, 2, log = T), digits = 7)
     )
   )
 })
