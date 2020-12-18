@@ -46,10 +46,20 @@ Tests for `ars()` fall into 3 main categories. The first of these is checking re
 
 # Tradeoffs
 
-One major tradeoff in our approach is due in part to the sequential nature of the algorithm. This meant that, while individual modular functions are vectorized, the best approach in following the algorithm itself ended up being to sample one value at a time. 
+One major tradeoff in our approach is due in part to the sequential nature of the algorithm. This meant that, while individual modular functions are vectorized, the best approach in following the algorithm itself ended up being to sample one value at a time. This is due to the computational cost of sampling values, meaning it's computationally expensive to over-sample and throw out the samples past the point at which it becomes necessary to recalculate `tanIntersect()`. Future versions of this package could revisit this tradeoff.
 
 In testing the performance of our approach, we compared it to the existing `ars` package on CRAN. We noted that our results ran significantly slower. However, we believe this to be due to two main differences: the CRAN package uses C++ for the majority of its calculations, while our package uses R exclusively, and the CRAN package requires the user to pass in values for the derivative of the log-density, while our package includes the computation of these values and only requires the user to specify the distribution function and appropriate parameters.
 
+# Results
+
+Our results for the number of iterations to achieve one sample from the standard normal distribution for different starting abscissae are shown below. The generating code can be found in `simulations.R`.
+
+
+```{r}
+read.csv('./table.csv', sep = ',')
+```
+Our results are generally consistent with Gilks et. al. with the caveat that we're counting iterations rather than evaluations of $h(x)$, so our results skew slightly lower. We also use 500 simulations instead of 1000 due to memory and time constraints, so there's more variability in our result. Our conclusion is the same, that the starting $(x_1, x_2) = (-1, 1)$ is ideal for the standard normal distribution.
+
 # Individual Contributions
 
-Brian wrote the `approxD()`, `tanInteresect()`, `checkThat()`, and `cavitySearch()` functions, as well as their tests. He also worked on parts of the main `ars()` wrapper function. and its tests. Ashish wrote the `upperHull()` and `sampleEnv()` functions, as well as tests for these and the `lowerHull()` function. Ben wrote the `lowerHull()` function and the main wrapper `ars()` function. All group members were involved in catching errors in the various functions, planning the layout of the package, and writing the final report.
+Brian wrote the `approxD()`, `tanInteresect()`, `checkThat()`, and `cavitySearch()` functions, as well as their tests. He also worked on parts of the main `ars()` wrapper function. and its tests. Ashish wrote the `upperHull()` and `sampleEnv()` functions, as well as tests for these and the `lowerHull()` function. Ben wrote the `lowerHull()` function and the main wrapper `ars()` function, and the simulation that generated the data for the table. All group members were involved in catching errors in the various functions, planning the layout of the package, and writing the final report.
