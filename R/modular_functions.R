@@ -560,14 +560,14 @@ sampleEnv <- function(n,
   samp <- (unif_samp - zb[idx]) * dhdx[idx] * norm/exp(hx[idx]) +
            exp((lb[idx] - x_abs[idx])*dhdx[idx])
   samp <- x_abs[idx] + log(samp)/dhdx[idx]
-  samp <- samp[!is.na(samp)]
+  samp <- samp[is.finite(samp)]
 
   while (length(samp)<n) {
     unif_samp <- runif(n)
     samp_1 <- (unif_samp - zb[idx]) * dhdx[idx] * norm/exp(hx[idx]) +
                exp((lb[idx] - x_abs[idx])*dhdx[idx])
     samp_1 <- x_abs[idx] + log(samp)/dhdx[idx]
-    samp_1 <- samp_1[!is.na(samp_1)]
+    samp_1 <- samp_1[is.finite(samp_1)]
     samp <- c(samp, samp_1)
   }
 

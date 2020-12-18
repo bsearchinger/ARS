@@ -83,7 +83,7 @@ test_that("output of tanIntersect is symmetric for symmetric distribution",{
     )
 })
 
-test_that("output of tanIntersect is corrent dimensions", {
+test_that("output of tanIntersect is correct dimensions", {
   expect_true(
     length(
       tanIntersect(
@@ -110,7 +110,7 @@ dexp_quo <- rlang::quo(dexp)
 dnorm_quo <- rlang::quo(dnorm)
 dgamma_quo <- rlang::quo(dgamma)
 
-test_that("checkThat runs silently for correct imputs", {
+test_that("checkThat runs silently for correct inputs", {
   expect_silent(
     checkThat(
       f = dnorm_quo,
@@ -274,10 +274,25 @@ test_that("output of upperHull is symmetric for symmetric distribution",{
 # Tests for sampleEnv: Sampling from Piecewise Envelope
 
 test_that("sampleEnv returns the correct sample size", {
-  expect_true(
-    length(
-      sampleEnv(10, ztest, dnorm)
-    ) == 10
+  expect_length(
+    sampleEnv(10, ztest, dnorm),
+    10
+  )
+  expect_length(
+    sampleEnv(10, 1:10/3, dgamma, f_params = list(shape = 4, rate = 2)),
+    10
+  )
+})
+
+test_that("sampleEnv works with several known distributions", {
+  expect_silent(
+    sampleEnv(10, ztest, dnorm)
+  )
+  expect_silent(
+    sampleEnv(10, 1:10/3, dchisq, f_params = list(df = 4))
+  )
+  expect_silent(
+    sampleEnv(10, 1:10/3, dgamma, f_params = list(shape = 4, rate = 2))
   )
 })
 
@@ -295,7 +310,7 @@ test_that("sampleEnv returns finite values", {
 xtest <- c(-0.25, -0.1, 0.1, 0.25)
 test_that("output of lowerHull is -Inf for out-of-bounds x", {
   expect_true(
-    lowerHull(-5:5, ztest, dnorm) == -Inf
+    lowerHull(-5, ztest, dnorm) == -Inf
   )
 })
 
