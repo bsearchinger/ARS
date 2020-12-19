@@ -20,7 +20,9 @@ representing the abscissae.}
 Default is \code{c(-Inf, Inf)}}
 }
 \value{
-A named \code{list} containing the y-values of the upper hull.
+A named \code{list} containing \code{vals}: the collection of n
+ samples, \code{k}: the count of abscissae added, \code{i}: the total number
+ of samples attempted, and \code{m}: the amount of rejected samples.
 }
 \description{
 \code{ars} calculates a given number of \code{n} random samples

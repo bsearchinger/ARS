@@ -673,10 +673,12 @@ lowerHull <- function(x,
 #' @param supp The support of \code{f}, as a two-membered \code{numeric} vector.
 #' Default is \code{c(-Inf, Inf)}
 #'
-#' @return A named \code{list} containing the y-values of the upper hull.
+#' @return A named \code{list} containing \code{vals}: the collection of n
+#'  samples, \code{k}: the count of abscissae added, \code{i}: the total number
+#'  of samples attempted, and \code{m}: the amount of rejected samples.
 #'
 #' @import assertthat
-#' @importFrom rlang exec
+#' @importFrom rlang exec sym enquo
 #'
 #' @export
 ars <- function(n, x_abs = NULL, f, f_params = NULL, supp = c(-Inf, Inf)){
