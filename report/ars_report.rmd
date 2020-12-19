@@ -4,6 +4,16 @@ author: "Brian Collica, Ashish Ramesh, Ben Searchinger"
 output: pdf_document
 ---
 
+# Location
+
+The package, including all associated files and scripts, is located in the following public GitHub repository: 
+
+  * bcollica/ars
+
+  * Link: https://github.com/bcollica/ars
+  
+The package can be installed locally using `remotes::install_github("bcollica/ars")`
+
 # Architecture
 
 The code was written as a set of modular functions, each of which carries out a specific task. Each of these functions is then called by the main wrapper function `ars`. 
