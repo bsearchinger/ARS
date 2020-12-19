@@ -10,7 +10,7 @@ dtest_log2 <- Deriv::Deriv(f = log, nderiv = 2)
 dtest_exp <- Deriv::Deriv(exp)
 dtest_norm <- Deriv::Deriv(dnorm)
 dtest_norm2 <- Deriv::Deriv(dnorm, nderiv = 2)
-
+print("Test that Derivative function evaluates correctly")
 test_that(
   "Derivative function evaluates correctly",{
     expect_equivalent(
@@ -50,7 +50,7 @@ test_that(
     )
   }
 )
-
+print("Test that Derivative Function throws an error")
 test_that(
   "Derivative Function throws an error", {
     expect_error(
@@ -68,6 +68,7 @@ test_that(
 # Tests for tanIntersect: Computing Intersections of Tangent Lines
 ztest <- c(-0.5, -0.1, 0, 0.1, 0.5)
 xtest <- seq(0, 1, length.out = 20)
+print("Test that output of tanIntersect is symmetric for symmetric distribution")
 test_that("output of tanIntersect is symmetric for symmetric distribution",{
   expect_true(
     all(
@@ -75,7 +76,7 @@ test_that("output of tanIntersect is symmetric for symmetric distribution",{
     ) == TRUE
   )
 })
-
+print("Test that output of tanIntersect is correct dimensions")
 test_that("output of tanIntersect is correct dimensions", {
   expect_true(
     length(
@@ -102,7 +103,7 @@ test_that("output of tanIntersect is correct dimensions", {
 dexp_quo <- rlang::quo(dexp)
 dnorm_quo <- rlang::quo(dnorm)
 dgamma_quo <- rlang::quo(dgamma)
-
+print("Test that checkThat runs silently for correct inputs")
 test_that("checkThat runs silently for correct inputs", {
   expect_silent(
     checkThat(
@@ -141,7 +142,7 @@ test_that("checkThat runs silently for correct inputs", {
     )
   )
 })
-
+print("Test that checkThat catches missing/incorrect density arguments")
 test_that("checkThat catches missing/incorrect density arguments", {
   expect_error(
     checkThat(
@@ -176,7 +177,7 @@ test_that("checkThat catches missing/incorrect density arguments", {
     )
   )
 })
-
+print("Test that checkThat catches invalid starting values")
 test_that("checkThat catches invalid starting values", {
   expect_error(
     checkThat(
@@ -211,7 +212,7 @@ test_that("checkThat catches invalid starting values", {
     )
   )
 })
-
+print("Test that checkThat catches invalid sample_size")
 test_that("checkThat catches invalid sample_size", {
   expect_error(
     checkThat(
@@ -241,6 +242,7 @@ test_that("checkThat catches invalid sample_size", {
 
 ################################################################################
 # Tests for cavitySearch: Log-concavity Check Function
+print("Test that cavitySearch detects non-log-concavity")
 test_that("cavitySearch detects non-log-concavity", {
   expect_false(
     cavitySearch(
@@ -256,7 +258,7 @@ test_that("cavitySearch detects non-log-concavity", {
 
 ################################################################################
 # Tests for upperHull: Upper Hull Function
-
+print("Test that output of upperHull is symmetric for symmetric distribution")
 ztest <- c(-0.5, -0.1, 0, 0.1, 0.5)
 test_that("output of upperHull is symmetric for symmetric distribution",{
   expect_true(
@@ -265,7 +267,7 @@ test_that("output of upperHull is symmetric for symmetric distribution",{
     ) == TRUE
   )
 })
-
+print("Test that upperHull bounds the log-distribution from above")
 test_that("upperHull bounds the log-distribution from above", {
   expect_true(
     all(
@@ -285,7 +287,7 @@ test_that("upperHull bounds the log-distribution from above", {
 
 ################################################################################
 # Tests for sampleEnv: Sampling from Piecewise Envelope
-
+print("Test that sampleEnv returns the correct sample size")
 test_that("sampleEnv returns the correct sample size", {
   expect_length(
     sampleEnv(10, ztest, dnorm),
@@ -296,7 +298,7 @@ test_that("sampleEnv returns the correct sample size", {
     10
   )
 })
-
+print("Test that sampleEnv works with several known distributions")
 test_that("sampleEnv works with several known distributions", {
   expect_silent(
     sampleEnv(10, ztest, dnorm)
@@ -308,7 +310,7 @@ test_that("sampleEnv works with several known distributions", {
     sampleEnv(10, 1:10/3, dgamma, f_params = list(shape = 4, rate = 2))
   )
 })
-
+print("Test that sampleEnv returns finite values")
 test_that("sampleEnv returns finite values", {
   expect_true(
     all(
@@ -319,14 +321,14 @@ test_that("sampleEnv returns finite values", {
 
 ################################################################################
 # Tests for lowerHull: Lower Hull Function
-
+print("Test that output of lowerHull is -Inf for out-of-bounds x")
 xtest <- c(-0.25, -0.1, 0.1, 0.25)
 test_that("output of lowerHull is -Inf for out-of-bounds x", {
   expect_true(
     lowerHull(-5, ztest, dnorm) == -Inf
   )
 })
-
+print("Test that lowerHull is less than or equal to upperHull")
 test_that("lowerHull is less than or equal to upperHull", {
   expect_true(
     all(
@@ -347,7 +349,7 @@ test_that("lowerHull is less than or equal to upperHull", {
     )
   )
 })
-
+print("Test that lowerHull bounds the log-distribution from below")
 test_that("lowerHull bounds the log-distribution from below", {
   expect_true(
     all(
@@ -376,6 +378,7 @@ expected_gamma_5_3 <- c(1.067018, 1.954670, 2.175522, 2.030368, 1.370136)
 expected_trunc_norm <- c(-0.32586650, -0.24809180, -0.49334810, -0.06272284, -1.27120300)
 
 # Tests for reproducible results
+print("Test that ars returns expected results for normal(0,1)")
 set.seed(1)
 norm_abs_0_1 <- runif(10, min = -3, max = 3)
 test_that("ars returns expected results for normal(0,1)", {
@@ -392,7 +395,7 @@ test_that("ars returns expected results for normal(0,1)", {
     expected_norm_0_1
   )
 })
-
+print("Test that ars returns expected results for gamma(2,3)")
 set.seed(1)
 gamma_abs_2_3 <- runif(10, min = 0, max = 1.5)
 test_that("ars returns expected results for gamma(2,3)", {
@@ -409,7 +412,7 @@ test_that("ars returns expected results for gamma(2,3)", {
     expected_gamma_2_3
   )
 })
-
+print("Test that ars returns expected results for gamma(5,3)")
 set.seed(1)
 gamma_abs_5_3 <- runif(10, min = 0.5, max = 3)
 test_that("ars returns expected results for gamma(5,3)", {
@@ -426,7 +429,7 @@ test_that("ars returns expected results for gamma(5,3)", {
     expected_gamma_5_3
   )
 })
-
+print("Test that ars returns expected results for truncated normal(0,1)")
 set.seed(1)
 norm_abs_trunc <- rnorm(100)
 norm_abs_trunc <- norm_abs_trunc[norm_abs_trunc < 0]
@@ -446,7 +449,7 @@ test_that("ars returns expected results for truncated normal(0,1)", {
     expected_trunc_norm
   )
 })
-
+print("Test that Non-log-concave distirbutions are caught")
 # Test for detecting non-log-concavity
 test_that("Non-log-concave distirbutions are caught", {
   expect_error(
@@ -482,7 +485,7 @@ test_that("Non-log-concave distirbutions are caught", {
     )
   )
 })
-
+print("Test that Mismatching initial values and support are detected")
 # Test to catch mis-matched initial x_abs and support arguments
 test_that("Mismatching initial values and support are detected", {
   expect_error(
@@ -498,6 +501,7 @@ test_that("Mismatching initial values and support are detected", {
   )
 })
 
+print("Test that ars() runs silently")
 set.seed(1)
 # Test that fucntion behaves normally
 test_that("ars() runs silently", {
